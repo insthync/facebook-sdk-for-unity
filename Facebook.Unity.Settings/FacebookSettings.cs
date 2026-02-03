@@ -75,14 +75,18 @@ namespace Facebook.Unity.Settings
         private bool xfbml = false;
         [SerializeField]
         private bool frictionlessRequests = true;
+#if UNITY_EDITOR
         [SerializeField]
         private string androidKeystorePath = string.Empty;
+#endif
         [SerializeField]
         private string iosURLSuffix = string.Empty;
         [SerializeField]
         private List<UrlSchemes> appLinkSchemes = new List<UrlSchemes>() { new UrlSchemes() };
+#if UNITY_EDITOR
         [SerializeField]
         private string uploadAccessToken = string.Empty;
+#endif
         // App Events Settings
         [SerializeField]
         private bool autoLogAppEventsEnabled = true;
@@ -316,6 +320,7 @@ namespace Facebook.Unity.Settings
             }
         }
 
+#if UNITY_EDITOR
         /// <summary>
         /// Gets or sets the android keystore path.
         /// </summary>
@@ -336,6 +341,7 @@ namespace Facebook.Unity.Settings
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Gets or sets the ios URL suffix.
@@ -409,6 +415,7 @@ namespace Facebook.Unity.Settings
             }
         }
 
+#if UNITY_EDITOR
         /// <summary>
         /// Gets or sets the upload access token.
         /// </summary>
@@ -430,6 +437,7 @@ namespace Facebook.Unity.Settings
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Gets or sets a value indicating whether App Events can be automatically logged.
