@@ -52,6 +52,8 @@ namespace Facebook.Unity.Mobile
 
         bool SetDomainErrorEnabled(bool domainErrorEnabled);
 
+        bool SetFastAppSwitchEnabled(bool fastAppSwitchEnabled);
+
         void SetDataProcessingOptions(IEnumerable<string> options, int country, int state);
 
         void OnIAPReady(FacebookDelegate<IIAPReadyResult> callback);

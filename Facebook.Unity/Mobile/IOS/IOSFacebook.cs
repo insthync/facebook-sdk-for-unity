@@ -90,6 +90,11 @@ namespace Facebook.Unity.Mobile.IOS
             return this.iosWrapper.FBDomainErrorEnabled(domainErrorEnabled);
         }
 
+        public override bool SetFastAppSwitchEnabled(bool fastAppSwitchEnabled)
+        {
+            return this.iosWrapper.FBFastAppSwitchEnabled(fastAppSwitchEnabled);
+        }
+
         public override void SetPushNotificationsDeviceTokenString(string token)
         {
             this.iosWrapper.SetPushNotificationsDeviceTokenString(token);

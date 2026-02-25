@@ -93,6 +93,8 @@ namespace Facebook.Unity.Mobile
 
         public abstract bool SetDomainErrorEnabled(bool domainErrorEnabled);
 
+        public abstract bool SetFastAppSwitchEnabled(bool fastAppSwitchEnabled);
+
         public abstract void SetPushNotificationsDeviceTokenString(string token);
 
         public override void OnLoginComplete(ResultContainer resultContainer)

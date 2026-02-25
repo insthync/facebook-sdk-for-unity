@@ -107,6 +107,11 @@ namespace Facebook.Unity.Mobile.Android
             return false;
         }
 
+        public override bool SetFastAppSwitchEnabled(bool fastAppSwitchEnabled)
+        {
+            return false;
+        }
+
         public override void SetPushNotificationsDeviceTokenString(string token)
         {
             this.CallFB("SetPushNotificationsDeviceTokenString", token);

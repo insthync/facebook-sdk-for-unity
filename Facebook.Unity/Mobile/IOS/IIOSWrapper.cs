@@ -110,6 +110,8 @@ namespace Facebook.Unity.Mobile.IOS
 
         bool FBDomainErrorEnabled(bool domainErrorEnabled);
 
+        bool FBFastAppSwitchEnabled(bool fastAppSwitchEnabled);
+
         void GetAppLink(int requestId);
 
         void RefreshCurrentAccessToken(int requestId);

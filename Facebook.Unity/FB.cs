@@ -1252,6 +1252,16 @@ namespace Facebook.Unity
             }
 
             /// <summary>
+            /// Sets the setting to enable/disable fast app switch for login.
+            /// When enabled, users can switch to the Facebook app for authentication if installed.
+            /// </summary>
+            /// <param name="fastAppSwitchEnabled">The setting for enabling/disabling fast app switch</param>
+            public static bool SetFastAppSwitchEnabled(bool fastAppSwitchEnabled)
+            {
+                return Mobile.MobileFacebookImpl.SetFastAppSwitchEnabled(fastAppSwitchEnabled);
+            }
+
+            /// <summary>
             /// Sets device token in the purpose of uninstall tracking.
             /// </summary>
             /// <param name="token">The device token from APNs</param>

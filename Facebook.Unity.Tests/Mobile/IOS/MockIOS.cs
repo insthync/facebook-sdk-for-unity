@@ -206,6 +206,12 @@ namespace Facebook.Unity.Tests.Mobile.IOS
             return true;
         }
 
+        public bool FBFastAppSwitchEnabled(bool fastAppSwitchEnabled)
+        {
+            this.LogMethodCall();
+            return true;
+        }
+
         public void FBAdvertiserIDCollectionEnabled(bool advertiserIDCollectionEnabled)
         {
             this.LogMethodCall();

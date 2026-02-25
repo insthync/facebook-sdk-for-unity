@@ -245,6 +245,11 @@ namespace Facebook.Unity.IOS
             return IOSWrapper.IOSFBDomainErrorEnabled(domainErrorEnabled);
         }
 
+        public bool FBFastAppSwitchEnabled(bool fastAppSwitchEnabled)
+        {
+            return IOSWrapper.IOSFBFastAppSwitchEnabled(fastAppSwitchEnabled);
+        }
+
         public void GetAppLink(int requestId)
         {
             IOSWrapper.IOSFBGetAppLink(requestId);
@@ -530,6 +535,9 @@ namespace Facebook.Unity.IOS
 
         [DllImport("__Internal")]
         private static extern bool IOSFBDomainErrorEnabled(bool domainErrorEnabled);
+
+        [DllImport("__Internal")]
+        private static extern bool IOSFBFastAppSwitchEnabled(bool fastAppSwitchEnabled);
 
         [DllImport("__Internal")]
         private static extern void IOSFBGetAppLink(int requestID);

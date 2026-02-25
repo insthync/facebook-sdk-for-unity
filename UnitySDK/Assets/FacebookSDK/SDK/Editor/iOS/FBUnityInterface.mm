@@ -658,6 +658,15 @@ extern "C" {
     return [FBSDKSettings.sharedSettings isDomainErrorEnabled];
   }
 
+  BOOL IOSFBFastAppSwitchEnabled(BOOL fastAppSwitchEnabled)
+  {
+    FBSDKLoginConfiguration *config = [[FBSDKLoginConfiguration alloc]
+      initWithPermissions:@[]
+      tracking:FBSDKLoginTrackingEnabled
+      appSwitch:fastAppSwitchEnabled ? FBSDKAppSwitchEnabled : FBSDKAppSwitchDisabled];
+    return config.appSwitch == FBSDKAppSwitchEnabled;
+  }
+
   char* IOSFBSdkVersion()
   {
     const char* string = [[FBSDKSettings.sharedSettings sdkVersion] UTF8String];

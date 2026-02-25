@@ -217,6 +217,10 @@ namespace Facebook.Unity.Editor
         {
             return true;
         }
+        public bool SetFastAppSwitchEnabled(bool fastAppSwitchEnabled)
+        {
+            return true;
+        }
 
         public void SetPushNotificationsDeviceTokenString(string token)
         {
