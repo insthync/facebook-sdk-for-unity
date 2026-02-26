@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [18.0.2]
+
+### Changed
+- Bumped SDK to 18.0.1
+- Bumped iOS SDK version to 18.0.2
+
 ## [18.0.0]
 
 ### Added
@@ -377,7 +383,8 @@ The release has been deprecated due to Unity support issues caused by removing â
 - Facebook Developer Docs: [Changelog v7.x](https://developers.facebook.com/docs/unity/change-log)
 
 <!-- Links -->
-[18.0.0]: https://github.com/facebook/facebook-sdk-for-unity/compare/sdk-version-17.0.2...HEAD
+[18.0.2]: https://github.com/facebook/facebook-sdk-for-unity/compare/sdk-version-18.0.0...HEAD
+[18.0.0]: https://github.com/facebook/facebook-sdk-for-unity/compare/sdk-version-17.0.2...sdk-version-18.0.0
 [17.0.2]: https://github.com/facebook/facebook-sdk-for-unity/compare/sdk-version-17.0.1...sdk-version-17.0.2
 [17.0.1]: https://github.com/facebook/facebook-sdk-for-unity/compare/sdk-version-17.0.0...sdk-version-17.0.1
 [17.0.0]: https://github.com/facebook/facebook-sdk-for-unity/compare/sdk-version-16.0.2...sdk-version-17.0.0
