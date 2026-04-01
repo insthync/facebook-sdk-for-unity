@@ -58,6 +58,18 @@ namespace Facebook.Unity.Example
                 this.Status = "FB.Init() called with " + FB.AppId;
             }
 
+            if (this.Button("Enable Fast App Switch"))
+            {
+                FB.Mobile.SetFastAppSwitchEnabled(true);
+                this.Status = "Fast App Switch Enabled";
+            }
+
+            if (this.Button("Disable Fast App Switch"))
+            {
+                FB.Mobile.SetFastAppSwitchEnabled(false);
+                this.Status = "Fast App Switch Disabled";
+            }
+
             GUILayout.BeginHorizontal();
 
             GUI.enabled = enabled && FB.IsInitialized;
