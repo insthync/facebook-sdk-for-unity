@@ -27,6 +27,8 @@
 #include "FBUnityUtility.h"
 #include "FBSDK+Internal.h"
 
+static BOOL _fastAppSwitchEnabled = NO;
+
 @interface FBUnityInterface()
 
 @property (nonatomic, copy) NSString *openURLString;
@@ -166,9 +168,9 @@ isPublishPermLogin:(BOOL)isPublishPermLogin
   }
   FBSDKLoginConfiguration *config;
   if (nonce) {
-    config = [[FBSDKLoginConfiguration alloc] initWithPermissions:permissions tracking:([trackingStr isEqualToString:@"enabled"] ? FBSDKLoginTrackingEnabled : FBSDKLoginTrackingLimited) nonce:nonceStr];
+    config = [[FBSDKLoginConfiguration alloc] initWithPermissions:permissions tracking:([trackingStr isEqualToString:@"enabled"] ? FBSDKLoginTrackingEnabled : FBSDKLoginTrackingLimited) nonce:nonceStr appSwitch:_fastAppSwitchEnabled ? FBSDKAppSwitchEnabled : FBSDKAppSwitchDisabled];
   } else {
-    config = [[FBSDKLoginConfiguration alloc] initWithPermissions:permissions tracking:([trackingStr isEqualToString:@"enabled"] ? FBSDKLoginTrackingEnabled : FBSDKLoginTrackingLimited)];
+    config = [[FBSDKLoginConfiguration alloc] initWithPermissions:permissions tracking:([trackingStr isEqualToString:@"enabled"] ? FBSDKLoginTrackingEnabled : FBSDKLoginTrackingLimited) appSwitch:_fastAppSwitchEnabled ? FBSDKAppSwitchEnabled : FBSDKAppSwitchDisabled];
   }
 
   void (^loginHandler)(FBSDKLoginManagerLoginResult *,NSError *) = ^(FBSDKLoginManagerLoginResult *result, NSError *error) {
@@ -660,11 +662,8 @@ extern "C" {
 
   BOOL IOSFBFastAppSwitchEnabled(BOOL fastAppSwitchEnabled)
   {
-    FBSDKLoginConfiguration *config = [[FBSDKLoginConfiguration alloc]
-      initWithPermissions:@[]
-      tracking:FBSDKLoginTrackingEnabled
-      appSwitch:fastAppSwitchEnabled ? FBSDKAppSwitchEnabled : FBSDKAppSwitchDisabled];
-    return config.appSwitch == FBSDKAppSwitchEnabled;
+    _fastAppSwitchEnabled = fastAppSwitchEnabled;
+    return _fastAppSwitchEnabled;
   }
 
   char* IOSFBSdkVersion()
