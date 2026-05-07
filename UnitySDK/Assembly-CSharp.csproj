@@ -96,45 +96,59 @@
   <ItemGroup>
     <Reference Include="UnityEngine">
       <HintPath>$(UNITY_ENGINE_DIR)UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.JSONSerializeModule">
       <HintPath>$(UNITY_ENGINE_DIR)UnityEngine.JSONSerializeModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
         <HintPath>$(UNITY_ENGINE_DIR)UnityEngine.CoreModule.dll</HintPath>
+        <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
         <HintPath>$(UNITY_ENGINE_DIR)UnityEngine.IMGUIModule.dll</HintPath>
+        <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
         <HintPath>$(UNITY_ENGINE_DIR)UnityEngine.TextRenderingModule.dll</HintPath>
+        <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule">
         <HintPath>$(UNITY_ENGINE_DIR)UnityEngine.UnityWebRequestModule.dll</HintPath>
+        <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
         <HintPath>$(UNITY_ENGINE_DIR)UnityEngine.ImageConversionModule.dll</HintPath>
+        <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
         <HintPath>$(UNITY_UI_DIR)UnityEngine.UI.dll</HintPath>
+        <Private>False</Private>
     </Reference>
      <Reference Include="UnityEngine.UnityWebRequestWWWModule">
         <HintPath>$(UNITY_ENGINE_DIR)UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+        <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UIModule">
       <HintPath>$(UNITY_ENGINE_DIR)UnityEngine.UIModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>$(UNITY_NETWORKING_DIR)ref/2.1.0/netstandard.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System">
       <HintPath>$(UNITY_NETWORKING_DIR)compat/2.1.0/shims/netfx/System.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="mscorlib">
       <HintPath>$(UNITY_NETWORKING_DIR)compat/2.1.0/shims/netfx/mscorlib.dll</HintPath>
+      <Private>False</Private>
     </Reference>
      <Reference Include="UnityEngine.InputModule">
       <HintPath>$(UNITY_ENGINE_DIR)UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <!-- END_UNITY_REFERENCES -->
