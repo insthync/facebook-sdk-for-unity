@@ -34,6 +34,8 @@ namespace Facebook.Unity.Editor
         private const string StreamingAssetsPath = "Assets/StreamingAssets/";
         private const string ExternalDependencyManagerPath = "Assets/ExternalDependencyManager/";
         private const string EditorPath = "Assets/Editor/";
+        private const string ScriptsPath = "Assets/Scripts/";
+        private const string IAPiOSPath = "Assets/IAPiOS/";
 
         public enum Target
         {
@@ -81,26 +83,19 @@ namespace Facebook.Unity.Editor
                 AssetDatabase.DeleteAsset(PluginsPath + "Android/AndroidManifest.xml");
                 AssetDatabase.DeleteAsset(PluginsPath + "Android/AndroidManifest.xml.meta");
 
-                string[] facebookFiles = (string[])Directory.GetFiles(FacebookPath, "*.*", SearchOption.TopDirectoryOnly);
-                string[] sdkFiles = (string[])Directory.GetFiles(SDKPath, "*.*", SearchOption.AllDirectories);
-                string[] exampleFiles = (string[])Directory.GetFiles(ExamplesPath, "*.*", SearchOption.AllDirectories);
-                string[] pluginsFiles = (string[])Directory.GetFiles(PluginsPath, "*.*", SearchOption.AllDirectories);
-                string[] streamingAssetsFiles = (string[])Directory.GetFiles(StreamingAssetsPath, "*.*", SearchOption.AllDirectories);
-                string[] externalDependencyManagerFiles = (string[])Directory.GetFiles(ExternalDependencyManagerPath, "*.*", SearchOption.AllDirectories);
-                string[] editorFiles = (string[])Directory.GetFiles(EditorPath, "*.*", SearchOption.AllDirectories);
-
-                string[] files = new string[facebookFiles.Length + sdkFiles.Length + exampleFiles.Length + pluginsFiles.Length + streamingAssetsFiles.Length + externalDependencyManagerFiles.Length + editorFiles.Length];
-
-                facebookFiles.CopyTo(files, 0);
-                sdkFiles.CopyTo(files, facebookFiles.Length);
-                exampleFiles.CopyTo(files, sdkFiles.Length + facebookFiles.Length);
-                pluginsFiles.CopyTo(files, sdkFiles.Length + facebookFiles.Length + exampleFiles.Length);
-                streamingAssetsFiles.CopyTo(files, sdkFiles.Length + facebookFiles.Length + exampleFiles.Length + pluginsFiles.Length);
-                externalDependencyManagerFiles.CopyTo(files, sdkFiles.Length + facebookFiles.Length + exampleFiles.Length + pluginsFiles.Length + streamingAssetsFiles.Length);
-                editorFiles.CopyTo(files, sdkFiles.Length + facebookFiles.Length + exampleFiles.Length + pluginsFiles.Length + streamingAssetsFiles.Length + externalDependencyManagerFiles.Length);
+                var fileList = new System.Collections.Generic.List<string>();
+                fileList.AddRange(Directory.GetFiles(FacebookPath, "*.*", SearchOption.TopDirectoryOnly));
+                fileList.AddRange(Directory.GetFiles(SDKPath, "*.*", SearchOption.AllDirectories));
+                fileList.AddRange(Directory.GetFiles(ExamplesPath, "*.*", SearchOption.AllDirectories));
+                fileList.AddRange(Directory.GetFiles(PluginsPath, "*.*", SearchOption.AllDirectories));
+                fileList.AddRange(Directory.GetFiles(StreamingAssetsPath, "*.*", SearchOption.AllDirectories));
+                fileList.AddRange(Directory.GetFiles(ExternalDependencyManagerPath, "*.*", SearchOption.AllDirectories));
+                fileList.AddRange(Directory.GetFiles(EditorPath, "*.*", SearchOption.AllDirectories));
+                fileList.AddRange(Directory.GetFiles(ScriptsPath, "*.*", SearchOption.AllDirectories));
+                fileList.AddRange(Directory.GetFiles(IAPiOSPath, "*.*", SearchOption.AllDirectories));
 
                 AssetDatabase.ExportPackage(
-                    files,
+                    fileList.ToArray(),
                     path,
                     ExportPackageOptions.IncludeDependencies | ExportPackageOptions.Recurse);
             }
