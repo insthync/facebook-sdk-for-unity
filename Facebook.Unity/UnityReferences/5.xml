@@ -1,8 +1,10 @@
   <ItemGroup>
     <Reference Include="UnityEngine">
       <HintPath>$(UNITY_ENGINE_DIR)UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>$(UNITY_UI_DIR)UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>

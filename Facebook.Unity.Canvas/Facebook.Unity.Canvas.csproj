@@ -35,6 +35,7 @@
   <ItemGroup>
     <Reference Include="UnityEngine">
       <HintPath>$(UNITY_MANAGED_DIR)UnityEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <!-- END_UNITY_REFERENCES -->
