@@ -1223,6 +1223,21 @@ namespace Facebook.Unity
             }
 
             /// <summary>
+            /// Logs the user in using Facebook SSO ("Login with Facebook") via the installed
+            /// Facebook app, falling back to a "Continue with Facebook" dialog / web login when
+            /// the Facebook app is missing or out of date (Android only). On other platforms
+            /// this is a no-op. On success the callback receives the login result.
+            /// </summary>
+            /// <param name="permissions">A list of permissions to request.</param>
+            /// <param name="callback">A callback for when the login is complete.</param>
+            public static void LoginWithSSO(
+                IEnumerable<string> permissions = null,
+                FacebookDelegate<ILoginResult> callback = null)
+            {
+                Mobile.MobileFacebookImpl.LoginWithSSO(permissions, callback);
+            }
+
+            /// <summary>
             /// Returns the setting for Automatic Purchase Logging
             /// </summary>
             public static bool IsImplicitPurchaseLoggingEnabled()

@@ -129,6 +129,16 @@ namespace Facebook.Unity.Editor
                 "public_profile");
         }
 
+        public void LoginWithSSO(
+            IEnumerable<string> permissions,
+            FacebookDelegate<ILoginResult> callback)
+        {
+            this.editorWrapper.ShowLoginMockDialog(
+                this.OnLoginComplete,
+                this.CallbackManager.AddFacebookDelegate(callback),
+                permissions == null ? "public_profile" : permissions.ToCommaSeparateList());
+        }
+
         public override void AppRequest(
             string message,
             OGActionType? actionType,

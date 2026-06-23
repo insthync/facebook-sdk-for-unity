@@ -87,6 +87,10 @@ namespace Facebook.Unity.Mobile
             RefreshFallbackPolicy fallbackPolicy,
             FacebookDelegate<ILoginResult> callback);
 
+        public abstract void LoginWithSSO(
+            IEnumerable<string> permissions,
+            FacebookDelegate<ILoginResult> callback);
+
         public abstract bool IsImplicitPurchaseLoggingEnabled();
 
         public abstract void SetAutoLogAppEventsEnabled(bool autoLogAppEventsEnabled);

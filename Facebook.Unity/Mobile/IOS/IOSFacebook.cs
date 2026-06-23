@@ -450,6 +450,13 @@ namespace Facebook.Unity.Mobile.IOS
             this.iosWrapper.RefreshLimitedLogin(this.AddCallback(callback), (int)fallbackPolicy);
         }
 
+        public override void LoginWithSSO(
+            IEnumerable<string> permissions,
+            FacebookDelegate<ILoginResult> callback)
+        {
+            FacebookLogger.Warn("LoginWithSSO is only implemented on Android. Use LogInWithReadPermissions() on iOS.");
+        }
+
         protected override void SetShareDialogMode(ShareDialogMode mode)
         {
             this.iosWrapper.SetShareDialogMode((int)mode);

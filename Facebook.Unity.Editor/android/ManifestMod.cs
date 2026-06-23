@@ -35,6 +35,7 @@ namespace Facebook.Unity.Editor
         public const string AppLinkActivityName = "com.facebook.unity.FBUnityAppLinkActivity";
         public const string DeepLinkingActivityName = "com.facebook.unity.FBUnityDeepLinkingActivity";
         public const string UnityLoginActivityName = "com.facebook.unity.FBUnityLoginActivity";
+        public const string UnitySSOActivityName = "com.facebook.unity.FBUnitySSOActivity";
         public const string UnityDialogsActivityName = "com.facebook.unity.FBUnityDialogsActivity";
         public const string UnityGameRequestActivityName = "com.facebook.unity.FBUnityGameRequestActivity";
         public const string UnityGamingServicesFriendFinderActivityName = "com.facebook.unity.FBUnityGamingServicesFriendFinderActivity";
@@ -143,6 +144,10 @@ namespace Facebook.Unity.Editor
             // add the unity login activity
             XmlElement unityLoginElement = CreateUnityOverlayElement(doc, ns, UnityLoginActivityName);
             ManifestMod.SetOrReplaceXmlElement(dict, unityLoginElement);
+
+            // add the unity SSO ("Login with Facebook" app-switch) activity
+            XmlElement unitySSOElement = CreateUnityOverlayElement(doc, ns, UnitySSOActivityName);
+            ManifestMod.SetOrReplaceXmlElement(dict, unitySSOElement);
 
             // add the unity dialogs activity
             XmlElement unityDialogsElement = CreateUnityOverlayElement(doc, ns, UnityDialogsActivityName);

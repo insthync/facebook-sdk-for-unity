@@ -44,6 +44,10 @@ namespace Facebook.Unity.Mobile
             RefreshFallbackPolicy fallbackPolicy,
             FacebookDelegate<ILoginResult> callback);
 
+        void LoginWithSSO(
+            IEnumerable<string> permissions,
+            FacebookDelegate<ILoginResult> callback);
+
         bool IsImplicitPurchaseLoggingEnabled();
 
         void SetPushNotificationsDeviceTokenString(string token);

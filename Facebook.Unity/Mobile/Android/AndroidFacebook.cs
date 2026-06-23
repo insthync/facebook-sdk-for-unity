@@ -200,6 +200,17 @@ namespace Facebook.Unity.Mobile.Android
             loginCall.Call(args);
         }
 
+        public override void LoginWithSSO(
+            IEnumerable<string> permissions,
+            FacebookDelegate<ILoginResult> callback)
+        {
+            MethodArguments args = new MethodArguments();
+            args.AddCommaSeparatedList(AndroidFacebook.LoginPermissionsKey, permissions);
+            var loginCall = new JavaMethodCall<ILoginResult>(this, "LoginWithSSO");
+            loginCall.Callback = callback;
+            loginCall.Call(args);
+        }
+
         public override void LogOut()
         {
             base.LogOut();

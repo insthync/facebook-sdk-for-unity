@@ -13,10 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `RefreshFallbackPolicy` enum (`Automatic`/`SilentOnly`/`ExplicitOnly`/`DirectOnly`)
   mirroring the native iOS `FBSDKRefreshFallbackPolicy`. On success the refreshed
   data is available via `FB.Mobile.CurrentProfile()`. No-op on Android.
+- `FB.Mobile.LoginWithSSO(permissions, callback)` to start "Login with Facebook"
+  SSO via an app-switch to the Facebook app, with a fallback dialog when no
+  compatible Facebook app is installed (Android only). No-op on iOS.
 
 ### Changed
 - Bumped the iOS dependency to Facebook iOS SDK `~> 18.1.0` — the first release
-  containing `LoginManager.refreshLimitedLogin` (required by the API above).
+  containing `LoginManager.refreshLimitedLogin` (required by the iOS API above).
+- Bumped the Android dependency to Facebook Android SDK `18.3.0` — the first
+  release containing `FBLoginSSOLauncher` (required by the Android API above).
 
 ## [18.0.2]
 
