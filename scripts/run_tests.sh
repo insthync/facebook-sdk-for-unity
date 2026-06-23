@@ -35,4 +35,10 @@ validate_any_file_exists "$NSUBSTITUTE_CONSOLE" "NSubstitute.dll" "Make sure NSu
 validate_file_exists "$NUNIT_CONSOLE" "Make sure mono is installed at this path"
 validate_file_exists "$TEST_DLL" "Make sure that the Unity Project successfully built"
 
-mono "$NUNIT_CONSOLE" "$TEST_DLL" --workers=0 || die "Some tests failed"
+# Unity's managed assemblies (UnityEngine.dll, etc.) are referenced by
+# Facebook.Unity.dll but are not copied to the output (Private=False), so mono
+# cannot resolve them when building vtables at test time. Add them to MONO_PATH
+# (mono's assembly resolver search path) so the tests can load. UNITY_MANAGED_DIR
+# is exported by common.sh from the configured UnityReferences.xml.
+MONO_PATH="$UNITY_MANAGED_DIR/UnityEngine:$UNITY_MANAGED_DIR${MONO_PATH:+:$MONO_PATH}" \
+  mono "$NUNIT_CONSOLE" "$TEST_DLL" --workers=0 || die "Some tests failed"

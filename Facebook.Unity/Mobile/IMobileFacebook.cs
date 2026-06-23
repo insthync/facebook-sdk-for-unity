@@ -40,6 +40,10 @@ namespace Facebook.Unity.Mobile
         void RefreshCurrentAccessToken(
             FacebookDelegate<IAccessTokenRefreshResult> callback);
 
+        void RefreshLimitedLogin(
+            RefreshFallbackPolicy fallbackPolicy,
+            FacebookDelegate<ILoginResult> callback);
+
         bool IsImplicitPurchaseLoggingEnabled();
 
         void SetPushNotificationsDeviceTokenString(string token);

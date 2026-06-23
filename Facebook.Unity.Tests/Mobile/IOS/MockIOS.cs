@@ -248,6 +248,15 @@ namespace Facebook.Unity.Tests.Mobile.IOS
             this.MobileFacebook.OnRefreshCurrentAccessTokenComplete(new ResultContainer(result));
         }
 
+        public void RefreshLimitedLogin(int requestID, int fallbackPolicy)
+        {
+            this.LogMethodCall();
+            var result = MockResults.GetGenericResult(requestID, this.ResultExtras);
+            result.TrySetKey(LoginResult.AuthTokenString, "mock_auth_token_string");
+            result.TrySetKey(LoginResult.AuthNonce, "mock_auth_nonce");
+            this.MobileFacebook.OnRefreshLimitedLoginComplete(new ResultContainer(result));
+        }
+
         private void LoginCommon(
             int requestID,
             string scope)

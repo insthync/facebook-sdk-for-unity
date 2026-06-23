@@ -454,6 +454,17 @@ namespace Facebook.Unity.Mobile.Android
             refreshCurrentAccessToken.Call();
         }
 
+        public override void RefreshLimitedLogin(
+            RefreshFallbackPolicy fallbackPolicy,
+            FacebookDelegate<ILoginResult> callback)
+        {
+            if (Debug.isDebugBuild)
+            {
+                Debug.Log("This function is only implemented on iOS.");
+            }
+            return;
+        }
+
         public override void OpenFriendFinderDialog(
             FacebookDelegate<IGamingServicesFriendFinderResult> callback)
         {

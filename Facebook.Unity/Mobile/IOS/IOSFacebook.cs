@@ -443,6 +443,13 @@ namespace Facebook.Unity.Mobile.IOS
                 System.Convert.ToInt32(CallbackManager.AddFacebookDelegate(callback)));
         }
 
+        public override void RefreshLimitedLogin(
+            RefreshFallbackPolicy fallbackPolicy,
+            FacebookDelegate<ILoginResult> callback)
+        {
+            this.iosWrapper.RefreshLimitedLogin(this.AddCallback(callback), (int)fallbackPolicy);
+        }
+
         protected override void SetShareDialogMode(ShareDialogMode mode)
         {
             this.iosWrapper.SetShareDialogMode((int)mode);

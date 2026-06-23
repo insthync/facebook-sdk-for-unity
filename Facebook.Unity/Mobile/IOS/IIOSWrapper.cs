@@ -116,6 +116,8 @@ namespace Facebook.Unity.Mobile.IOS
 
         void RefreshCurrentAccessToken(int requestId);
 
+        void RefreshLimitedLogin(int requestId, int fallbackPolicy);
+
         string FBSdkVersion();
 
         void FBSetUserID(string userID);

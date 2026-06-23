@@ -1208,6 +1208,21 @@ namespace Facebook.Unity
             }
 
             /// <summary>
+            /// Refreshes the profile data for a Limited Login user (iOS only).
+            /// On success the refreshed data is available via <see cref="CurrentProfile()"/>
+            /// and the callback receives the new authentication token. On other
+            /// platforms this is a no-op.
+            /// </summary>
+            /// <param name="callback">A callback for when the refresh is complete.</param>
+            /// <param name="fallbackPolicy">How the refresh should be attempted (direct/silent/explicit cascade).</param>
+            public static void RefreshLimitedLogin(
+                FacebookDelegate<ILoginResult> callback = null,
+                RefreshFallbackPolicy fallbackPolicy = RefreshFallbackPolicy.Automatic)
+            {
+                Mobile.MobileFacebookImpl.RefreshLimitedLogin(fallbackPolicy, callback);
+            }
+
+            /// <summary>
             /// Returns the setting for Automatic Purchase Logging
             /// </summary>
             public static bool IsImplicitPurchaseLoggingEnabled()

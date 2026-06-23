@@ -431,6 +431,11 @@ namespace Facebook.Unity.IOS
             IOSWrapper.IOSFBRefreshCurrentAccessToken(requestId);
         }
 
+        public void RefreshLimitedLogin(int requestId, int fallbackPolicy)
+        {
+            IOSWrapper.IOSFBRefreshLimitedLogin(requestId, fallbackPolicy);
+        }
+
         [DllImport("__Internal")]
         private static extern void IOSFBInit(
             string appId,
@@ -550,6 +555,9 @@ namespace Facebook.Unity.IOS
 
         [DllImport("__Internal")]
         private static extern void IOSFBRefreshCurrentAccessToken(int requestID);
+
+        [DllImport("__Internal")]
+        private static extern void IOSFBRefreshLimitedLogin(int requestID, int fallbackPolicy);
 
         [DllImport("__Internal")]
         private static extern void IOSFBSetUserID(string userID);

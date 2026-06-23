@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [18.1.0]
+
+### Added
+- `FB.Mobile.RefreshLimitedLogin(callback, fallbackPolicy)` to refresh the profile
+  data of a Limited Login user without a full re-login (iOS only). Added the
+  `RefreshFallbackPolicy` enum (`Automatic`/`SilentOnly`/`ExplicitOnly`/`DirectOnly`)
+  mirroring the native iOS `FBSDKRefreshFallbackPolicy`. On success the refreshed
+  data is available via `FB.Mobile.CurrentProfile()`. No-op on Android.
+
+### Changed
+- Bumped the iOS dependency to Facebook iOS SDK `~> 18.1.0` — the first release
+  containing `LoginManager.refreshLimitedLogin` (required by the API above).
+
 ## [18.0.2]
 
 ### Changed
