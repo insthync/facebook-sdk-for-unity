@@ -93,7 +93,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="android\DefaultAndroidManifest.xml" />
+    <EmbeddedResource Include="android\DefaultAndroidManifest.xml">
+      <LogicalName>Facebook.Unity.Editor.android.DefaultAndroidManifest.xml</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
