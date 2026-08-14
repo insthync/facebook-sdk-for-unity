@@ -20,34 +20,11 @@
 
 namespace Facebook.Unity.Editor
 {
-    using System;
     using System.IO;
-    using System.Text.RegularExpressions;
-    using UnityEngine;
     using Facebook.Unity.Editor.iOS.Xcode;
 
     public class FixupFiles
     {
-        private static string didFinishLaunchingWithOptions =
-@"(?x)                                  # Verbose mode
-  (didFinishLaunchingWithOptions.+      # Find this function...
-    (?:.*\n)+?                          # Match as few lines as possible until...
-    \s*return\ )NO(\;\n                 #   return NO;
-  \})                                   # }";
-
-        public static void FixColdStart(string path)
-        {
-            string fullPath = Path.Combine(path, Path.Combine("Classes", "UnityAppController.mm"));
-            string data = Load(fullPath);
-
-            data = Regex.Replace(
-                data,
-                didFinishLaunchingWithOptions,
-                "$1YES$2");
-
-            Save(fullPath, data);
-        }
-
         public static void AddBuildFlag(string path)
         {
             string projPath = Path.Combine(path, Path.Combine("Unity-iPhone.xcodeproj", "project.pbxproj"));
@@ -76,34 +53,6 @@ namespace Facebook.Unity.Editor
             System.IO.StreamWriter writer = new System.IO.StreamWriter(fullPath, false);
             writer.Write(data);
             writer.Close();
-        }
-
-        private static int GetUnityVersionNumber()
-        {
-            string version = Application.unityVersion;
-            string[] versionComponents = version.Split('.');
-
-            int majorVersion = 0;
-            int minorVersion = 0;
-
-            try
-            {
-                if (versionComponents != null && versionComponents.Length > 0 && versionComponents[0] != null)
-                {
-                    majorVersion = Convert.ToInt32(versionComponents[0]);
-                }
-
-                if (versionComponents != null && versionComponents.Length > 1 && versionComponents[1] != null)
-                {
-                    minorVersion = Convert.ToInt32(versionComponents[1]);
-                }
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError("Error parsing Unity version number: " + e);
-            }
-
-            return (majorVersion * 100) + (minorVersion * 10);
         }
     }
 }
