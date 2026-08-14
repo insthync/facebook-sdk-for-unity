@@ -139,6 +139,10 @@
       <Project>{3DFF6C0C-BB04-405D-A23F-95999630E7F8}</Project>
       <Name>Facebook.Unity</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Facebook.Unity.Editor\Facebook.Unity.Editor.csproj">
+      <Project>{4F631992-8D32-4AB5-8073-4BDC8A79380B}</Project>
+      <Name>Facebook.Unity.Editor</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
