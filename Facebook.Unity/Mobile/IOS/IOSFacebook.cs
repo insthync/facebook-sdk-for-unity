@@ -150,6 +150,17 @@ namespace Facebook.Unity.Mobile.IOS
                 iosURLSuffix,
                 Constants.UnitySDKUserAgentSuffixLegacy);
             this.userID = this.iosWrapper.FBGetUserID();
+
+            // Swift stores the cold-start URL for absoluteURL instead of posting a notification.
+            try
+            {
+                this.iosWrapper.HandleLaunchURL(UnityEngine.Application.absoluteURL);
+            }
+            catch (Exception e)
+            {
+                // absoluteURL is player-only; a lost deep link beats Init throwing under NUnit.
+                FacebookLogger.Warn("Could not read the launch URL: {0}", e.Message);
+            }
         }
 
         public override void EnableProfileUpdatesOnAccessTokenChange(bool enable)

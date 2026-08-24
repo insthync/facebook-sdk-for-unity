@@ -223,6 +223,11 @@ namespace Facebook.Unity.Tests.Mobile.IOS
             this.Facebook.OnGetAppLinkComplete(new ResultContainer(result));
         }
 
+        public void HandleLaunchURL(string url)
+        {
+            this.LogMethodCall();
+        }
+
         public string FBSdkVersion()
         {
             return "1.0.0";

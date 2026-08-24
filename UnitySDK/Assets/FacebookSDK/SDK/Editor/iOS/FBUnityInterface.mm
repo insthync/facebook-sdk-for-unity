@@ -654,6 +654,40 @@ extern "C" {
                                                          title: title];
   }
 
+  // Swift-only: the cold-start URL arrives via Application.absoluteURL from C#, not a notification.
+#if UNITY_XCODE_PROJECT_TYPE_SWIFT
+  void IOSFBHandleLaunchURL(const char *urlString)
+  {
+    if ([FBUnityInterface sharedInstance].openURLString != nil) {
+      return;
+    }
+
+    NSString *absoluteString = [FBUnityUtility stringFromCString:urlString];
+    if (absoluteString.length == 0) {
+      return;
+    }
+
+    NSURL *url = [NSURL URLWithString:absoluteString];
+    if (url == nil) {
+      return;
+    }
+
+    // Offered to the SDK first, like the warm path, so a Login redirect is not seen as an app link.
+    BOOL isHandledByFBSDK = [[FBSDKApplicationDelegate sharedInstance] application:[UIApplication sharedApplication]
+                                                                          openURL:url
+                                                                sourceApplication:nil
+                                                                       annotation:nil];
+    if (!isHandledByFBSDK) {
+      [FBUnityInterface sharedInstance].openURLString = absoluteString;
+    }
+  }
+#else
+  // No-op: onOpenURL: already delivered it, and openURLString is empty when FBSDK claimed the URL.
+  void IOSFBHandleLaunchURL(__unused const char *urlString)
+  {
+  }
+#endif
+
   void IOSFBGetAppLink(int requestId)
   {
     NSURL *url = [NSURL URLWithString:[FBUnityInterface sharedInstance].openURLString];

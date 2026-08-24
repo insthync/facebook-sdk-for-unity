@@ -255,6 +255,11 @@ namespace Facebook.Unity.IOS
             IOSWrapper.IOSFBGetAppLink(requestId);
         }
 
+        public void HandleLaunchURL(string url)
+        {
+            IOSWrapper.IOSFBHandleLaunchURL(url);
+        }
+
         public string FBSdkVersion()
         {
             return IOSWrapper.IOSFBSdkVersion();
@@ -546,6 +551,9 @@ namespace Facebook.Unity.IOS
 
         [DllImport("__Internal")]
         private static extern void IOSFBGetAppLink(int requestID);
+
+        [DllImport("__Internal")]
+        private static extern void IOSFBHandleLaunchURL(string url);
 
         [DllImport("__Internal")]
         private static extern string IOSFBSdkVersion();

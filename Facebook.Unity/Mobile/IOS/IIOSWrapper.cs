@@ -114,6 +114,8 @@ namespace Facebook.Unity.Mobile.IOS
 
         void GetAppLink(int requestId);
 
+        void HandleLaunchURL(string url);
+
         void RefreshCurrentAccessToken(int requestId);
 
         void RefreshLimitedLogin(int requestId, int fallbackPolicy);
