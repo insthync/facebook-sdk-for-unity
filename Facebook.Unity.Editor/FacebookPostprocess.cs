@@ -20,7 +20,6 @@
 
 namespace Facebook.Unity.Editor
 {
-    using System.IO;
     using Facebook.Unity;
     using Facebook.Unity.Settings;
     using UnityEditor;
@@ -29,32 +28,6 @@ namespace Facebook.Unity.Editor
 
     public static class XCodePostProcess
     {
-        // Only the Objective-C Xcode project type names the app target statically. The Swift
-        // project type derives it from the Unity project name.
-        private const string ObjectiveCAppTargetName = "Unity-iPhone";
-
-        [PostProcessBuildAttribute(45)]
-        private static void PostProcessBuild_iOS(BuildTarget target, string buildPath)
-        {
-            if (target == BuildTarget.iOS)
-            {
-                string podFilePath = Path.Combine(buildPath, "Podfile");
-                if (File.Exists(podFilePath))
-                {
-                    string contents = File.ReadAllText(podFilePath);
-                    string updated = PodfileEditor.AppendTargetIfMissing(contents, ObjectiveCAppTargetName);
-                    if (updated != contents)
-                    {
-                        File.WriteAllText(podFilePath, updated);
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("No podfile created");
-                }
-            }
-        }
-
         [PostProcessBuild(100)]
         public static void OnPostProcessBuild(BuildTarget target, string path)
         {
@@ -64,13 +37,7 @@ namespace Facebook.Unity.Editor
                 Debug.LogWarning("You didn't specify a Facebook app ID.  Please add one using the Facebook menu in the main Unity editor.");
             }
 
-            // Unity renamed build target from iPhone to iOS in Unity 5, this keeps both versions happy
-            if (target.ToString() == "iOS" || target.ToString() == "iPhone")
-            {
-                UpdatePlistAtPath(Path.Combine(path, "Info.plist"));
-                FixupFiles.AddBuildFlag(path);
-            }
-
+            // iOS is handled by Assets/Editor/FBXcodePostProcess.cs, which ships as source.
             if (target == BuildTarget.Android)
             {
                 // The default Bundle Identifier for Unity does magical things that causes bad stuff to happen
@@ -95,13 +62,7 @@ namespace Facebook.Unity.Editor
         }
 
         /// <summary>
-        /// Writes the Facebook settings into the exported Info.plist. Takes the full plist path
-        /// rather than the build root: only the Objective-C Xcode project type is guaranteed to
-        /// emit Info.plist there, so resolving it is the caller's job.
-        ///
-        /// Renamed from UpdatePlist deliberately. Keeping the old name with a new meaning for its
-        /// only parameter would let an external caller keep compiling while silently writing to
-        /// the wrong path.
+        /// Writes the Facebook settings into the exported Info.plist at the given full path.
         /// </summary>
         public static void UpdatePlistAtPath(string plistFullPath)
         {
