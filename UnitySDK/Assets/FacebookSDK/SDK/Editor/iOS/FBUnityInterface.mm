@@ -38,6 +38,11 @@ static BOOL _fastAppSwitchEnabled = NO;
 - (void)didFinishLaunching:(NSNotification *)notification;
 - (void)didBecomeActive:(NSNotification *)notification;
 
+#if UNITY_XCODE_PROJECT_TYPE_SWIFT
+// Swift-only: no AppDelegateListener counterpart to inherit this from.
+- (void)onSceneOpenURLContexts:(NSNotification *)notification;
+#endif
+
 @end
 
 @implementation FBUnityInterface
@@ -86,8 +91,34 @@ static BOOL _fastAppSwitchEnabled = NO;
                  name:UIApplicationDidBecomeActiveNotification
                object:nil];
 
-  // URL delivery is registered separately: under the Swift project type incoming URLs arrive on a
-  // Unity-published notification rather than on kUnityOnOpenURL, so it needs its own observer.
+  // Literal names: the UnityNotifications Swift header exists only under the Swift project type.
+  [center addObserver:self
+             selector:@selector(onSceneOpenURLContexts:)
+                 name:@"UnitySceneOpenURLContexts"
+               object:nil];
+}
+
+// A scene can be handed several URLs at once, so each context is offered to the SDK in turn.
+- (void)onSceneOpenURLContexts:(NSNotification *)notification
+{
+  id contexts = notification.userInfo[@"UnityNotificationsOpenURLContextsKey"];
+  if (![contexts isKindOfClass:[NSSet class]]) {
+    return;
+  }
+
+  for (UIOpenURLContext *context in (NSSet *)contexts) {
+    if (![context isKindOfClass:[UIOpenURLContext class]]) {
+      continue;
+    }
+    // sourceApplication and annotation live on context.options here, not the notification userInfo.
+    BOOL isHandledByFBSDK = [[FBSDKApplicationDelegate sharedInstance] application:[UIApplication sharedApplication]
+                                                                          openURL:context.URL
+                                                                sourceApplication:context.options.sourceApplication
+                                                                       annotation:context.options.annotation];
+    if (!isHandledByFBSDK) {
+      [FBUnityInterface sharedInstance].openURLString = [context.URL absoluteString];
+    }
+  }
 }
 #endif
 
