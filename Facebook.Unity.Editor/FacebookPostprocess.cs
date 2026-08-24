@@ -23,8 +23,36 @@ namespace Facebook.Unity.Editor
     using Facebook.Unity;
     using Facebook.Unity.Settings;
     using UnityEditor;
+    using UnityEditor.Build;
+    using UnityEditor.Build.Reporting;
     using UnityEditor.Callbacks;
     using UnityEngine;
+
+    // Pre-build so this build gets it: the entry point can change without the Facebook UI that regenerates the manifest.
+    public class FacebookAndroidPreprocess : IPreprocessBuildWithReport
+    {
+        public int callbackOrder
+        {
+            get { return 0; }
+        }
+
+        public void OnPreprocessBuild(BuildReport report)
+        {
+            if (report.summary.platform != BuildTarget.Android)
+            {
+                return;
+            }
+
+            // Without an App ID there is nothing to write, and creating a manifest for an
+            // unconfigured project would change its merge result on every build.
+            if (!FacebookSettings.IsValidAppId)
+            {
+                return;
+            }
+
+            ManifestMod.GenerateManifest();
+        }
+    }
 
     public static class XCodePostProcess
     {
