@@ -33,6 +33,11 @@ static BOOL _fastAppSwitchEnabled = NO;
 
 @property (nonatomic, copy) NSString *openURLString;
 
+// Declared explicitly so @selector(...) resolves under the Swift Xcode project type, where these
+// are no longer inherited from the AppDelegateListener protocol.
+- (void)didFinishLaunching:(NSNotification *)notification;
+- (void)didBecomeActive:(NSNotification *)notification;
+
 @end
 
 @implementation FBUnityInterface

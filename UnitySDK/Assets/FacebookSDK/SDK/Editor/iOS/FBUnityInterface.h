@@ -18,6 +18,11 @@
 
 #import <UIKit/UIKit.h>
 
+// Value-tested, never with defined(): Unity sets the macro to 0 under the Objective-C Xcode
+// project type and 1 under Swift, so defined() would take the Swift branch under both. How Unity
+// delivers it to third-party plugin sources is unverified here — the macro is Unity 6.5+ only and
+// no trampoline vendored in third-party/toolchains/unity is new enough to define it. Absence is
+// the safe case either way: #if reads an undefined macro as 0, i.e. the Objective-C branch.
 #if !UNITY_XCODE_PROJECT_TYPE_SWIFT
 // Trampoline-only. The Swift Xcode project type replaces UnityAppController with UnityPlayer and
 // publishes lifecycle through NotificationCenter, so neither this header nor the
