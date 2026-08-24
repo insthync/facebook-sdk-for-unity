@@ -29,6 +29,10 @@ namespace Facebook.Unity.Editor
 
     public static class XCodePostProcess
     {
+        // Only the Objective-C Xcode project type names the app target statically. The Swift
+        // project type derives it from the Unity project name.
+        private const string ObjectiveCAppTargetName = "Unity-iPhone";
+
         [PostProcessBuildAttribute(45)]
         private static void PostProcessBuild_iOS(BuildTarget target, string buildPath)
         {
@@ -38,14 +42,10 @@ namespace Facebook.Unity.Editor
                 if (File.Exists(podFilePath))
                 {
                     string contents = File.ReadAllText(podFilePath);
-                    bool isUnityIphoneInPodFile = contents.Contains("Unity-iPhone");
-                    using (StreamWriter sw = File.AppendText(podFilePath))
+                    string updated = PodfileEditor.AppendTargetIfMissing(contents, ObjectiveCAppTargetName);
+                    if (updated != contents)
                     {
-                        if (!isUnityIphoneInPodFile)
-                        {
-                            sw.WriteLine("target 'Unity-iPhone' do");
-                            sw.WriteLine("end");
-                        }
+                        File.WriteAllText(podFilePath, updated);
                     }
                 }
                 else
@@ -67,7 +67,7 @@ namespace Facebook.Unity.Editor
             // Unity renamed build target from iPhone to iOS in Unity 5, this keeps both versions happy
             if (target.ToString() == "iOS" || target.ToString() == "iPhone")
             {
-                UpdatePlist(path);
+                UpdatePlistAtPath(Path.Combine(path, "Info.plist"));
                 FixupFiles.AddBuildFlag(path);
             }
 
@@ -94,12 +94,19 @@ namespace Facebook.Unity.Editor
             }
         }
 
-        public static void UpdatePlist(string path)
+        /// <summary>
+        /// Writes the Facebook settings into the exported Info.plist. Takes the full plist path
+        /// rather than the build root: only the Objective-C Xcode project type is guaranteed to
+        /// emit Info.plist there, so resolving it is the caller's job.
+        ///
+        /// Renamed from UpdatePlist deliberately. Keeping the old name with a new meaning for its
+        /// only parameter would let an external caller keep compiling while silently writing to
+        /// the wrong path.
+        /// </summary>
+        public static void UpdatePlistAtPath(string plistFullPath)
         {
-            const string FileName = "Info.plist";
             string appId = FacebookSettings.AppId;
             string clientToken = FacebookSettings.ClientToken;
-            string fullPath = Path.Combine(path, FileName);
 
             if (string.IsNullOrEmpty(appId) || appId.Equals("0"))
             {
@@ -107,7 +114,7 @@ namespace Facebook.Unity.Editor
                 return;
             }
 
-            var facebookParser = new PListParser(fullPath);
+            var facebookParser = new PListParser(plistFullPath);
             facebookParser.UpdateFBSettings(
                 appId,
                 clientToken,
