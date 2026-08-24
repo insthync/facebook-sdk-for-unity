@@ -18,14 +18,23 @@
 
 #import <UIKit/UIKit.h>
 
+#if !UNITY_XCODE_PROJECT_TYPE_SWIFT
+// Trampoline-only. The Swift Xcode project type replaces UnityAppController with UnityPlayer and
+// publishes lifecycle through NotificationCenter, so neither this header nor the
+// AppDelegateListener protocol exists there.
 #import "AppDelegateListener.h"
 
 //if we are on a version of unity that has the version number defined use it, otherwise we have added it ourselves in the post build step
 #if HAS_UNITY_VERSION_DEF
 #include "UnityTrampolineConfigure.h"
 #endif
+#endif
 
+#if UNITY_XCODE_PROJECT_TYPE_SWIFT
+@interface FBUnityInterface : NSObject
+#else
 @interface FBUnityInterface : NSObject <AppDelegateListener>
+#endif
 {
   //If you make changes in here make the same changes in Assets/Facebook/Scripts/NativeDialogModes.cs
   enum ShareDialogMode

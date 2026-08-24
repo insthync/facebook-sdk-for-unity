@@ -54,13 +54,37 @@ static BOOL _fastAppSwitchEnabled = NO;
 
 + (void)load
 {
+#if UNITY_XCODE_PROJECT_TYPE_SWIFT
+  [[FBUnityInterface sharedInstance] registerForLifecycleNotifications];
+#else
   UnityRegisterAppDelegateListener([FBUnityInterface sharedInstance]);
+#endif
 }
 
 #pragma mark - App (Delegate) Lifecycle
 
-// didBecomeActive: and onOpenURL: are called by Unity's AppController
-// because we implement <AppDelegateListener> and registered via UnityRegisterAppDelegateListener(...) above.
+// Under the Objective-C Xcode project type, didBecomeActive: and onOpenURL: are called by Unity's
+// AppController because we implement <AppDelegateListener> and registered via
+// UnityRegisterAppDelegateListener(...) above. The Swift project type has no AppDelegateListener,
+// so the same methods are driven from NotificationCenter instead.
+
+#if UNITY_XCODE_PROJECT_TYPE_SWIFT
+- (void)registerForLifecycleNotifications
+{
+  NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+  [center addObserver:self
+             selector:@selector(didFinishLaunching:)
+                 name:UIApplicationDidFinishLaunchingNotification
+               object:nil];
+  [center addObserver:self
+             selector:@selector(didBecomeActive:)
+                 name:UIApplicationDidBecomeActiveNotification
+               object:nil];
+
+  // URL delivery is registered separately: under the Swift project type incoming URLs arrive on a
+  // Unity-published notification rather than on kUnityOnOpenURL, so it needs its own observer.
+}
+#endif
 
 - (void)didFinishLaunching:(NSNotification *)notification
 {
