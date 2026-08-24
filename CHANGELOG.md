@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Unity 6.5 support on iOS for the Swift Xcode project type, including Login
+  redirects, deep links, and app links.
+- Unity 6 support on Android.
+
+### Changed
+- Bumped the Android External Dependency Manager to `1.2.188` — required for
+  the Unity 6 Android support above.
+    - Upgrading an existing project requires deleting
+      `Assets/ExternalDependencyManager/Editor/1.2.166/` and the old
+      `gpsr`-labeled `.aar`/`.jar` files under `Assets/Plugins/Android/`, then
+      restarting the editor.
+
 ## [18.1.0]
 
 ### Added
