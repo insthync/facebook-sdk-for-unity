@@ -88,5 +88,65 @@ namespace Facebook.Unity.Tests.BuildPostProcess
                 UnityFrameworkPodfile,
                 PodfileEditor.AppendTargetIfMissing(UnityFrameworkPodfile, null));
         }
+
+        [TestCase(
+            "use_frameworks! :linkage => :static\n",
+            "use_frameworks!\n",
+            TestName = "ForcesDynamic_Symbol")]
+        [TestCase(
+            "use_frameworks! :linkage => static\n",
+            "use_frameworks!\n",
+            TestName = "ForcesDynamic_BareStatic")]
+        [TestCase(
+            "  use_frameworks!  :linkage  =>  :static  \n",
+            "  use_frameworks!\n",
+            TestName = "ForcesDynamic_IndentedAndPadded")]
+        [TestCase(
+            "use_frameworks!(:linkage => :static)\n",
+            "use_frameworks!\n",
+            TestName = "ForcesDynamic_Parenthesized")]
+        [TestCase(
+            "use_frameworks! :linkage => :static",
+            "use_frameworks!",
+            TestName = "ForcesDynamic_NoTrailingNewline")]
+        public void RewritesStaticLinkageToDynamic(string podfile, string expected)
+        {
+            Assert.AreEqual(expected, PodfileEditor.ForceDynamicFrameworkLinkage(podfile));
+        }
+
+        [TestCase("use_frameworks!\n", TestName = "Unchanged_AlreadyDynamic")]
+        [TestCase("use_frameworks! :linkage => :dynamic\n", TestName = "Unchanged_ExplicitDynamic")]
+        [TestCase("# use_frameworks! :linkage => :static\n", TestName = "Unchanged_Commented")]
+        [TestCase("", TestName = "Unchanged_Empty")]
+        [TestCase(UnityFrameworkPodfile, TestName = "Unchanged_NoLinkageDeclaration")]
+        public void LeavesLinkageUnchangedWhenNotStatic(string podfile)
+        {
+            Assert.AreEqual(podfile, PodfileEditor.ForceDynamicFrameworkLinkage(podfile));
+        }
+
+        [Test]
+        public void TreatsNullContentsAsEmptyWhenRewritingLinkage()
+        {
+            Assert.AreEqual(string.Empty, PodfileEditor.ForceDynamicFrameworkLinkage(null));
+        }
+
+        [Test]
+        public void RewritesLinkageInAGeneratedPodfileWithoutDisturbingTheRest()
+        {
+            // Shape of what the iOS Resolver emits, with the app target block already appended.
+            string podfile =
+                "source 'https://cdn.cocoapods.org/'\n\n" +
+                "platform :ios, '12.0'\n\n" +
+                "target 'UnityFramework' do\n  pod 'FBSDKCoreKit', '~> 18.1.0'\nend\n" +
+                "target 'Unity-iPhone' do\nend\n" +
+                "use_frameworks! :linkage => :static\n";
+
+            string result = PodfileEditor.ForceDynamicFrameworkLinkage(podfile);
+
+            Assert.IsTrue(result.EndsWith("use_frameworks!\n"), result);
+            Assert.IsFalse(result.Contains(":linkage"), result);
+            Assert.IsTrue(result.Contains("pod 'FBSDKCoreKit', '~> 18.1.0'"), result);
+            Assert.IsTrue(PodfileEditor.ContainsTarget(result, AppTarget));
+        }
     }
 }

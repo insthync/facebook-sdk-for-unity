@@ -74,5 +74,24 @@ namespace Facebook.Unity.Editor
 
             return builder.ToString();
         }
+
+        /// <summary>
+        /// Rewrites a static <c>use_frameworks!</c> to dynamic; static drops the embed phase the FBSDK xcframeworks need.
+        /// </summary>
+        public static string ForceDynamicFrameworkLinkage(string contents)
+        {
+            string existing = contents ?? string.Empty;
+
+            if (existing.Length == 0)
+            {
+                return existing;
+            }
+
+            // Character classes stay [ \t] rather than \s so a match cannot span lines.
+            const string StaticLinkage =
+                @"^([ \t]*)use_frameworks![ \t]*\(?[ \t]*:linkage[ \t]*=>[ \t]*:?static[ \t]*\)?[ \t]*\r?$";
+
+            return Regex.Replace(existing, StaticLinkage, "${1}use_frameworks!", RegexOptions.Multiline);
+        }
     }
 }

@@ -38,7 +38,7 @@ namespace Facebook.Unity.PostProcess
         private const string UnityAppTargetName = "Unity-iPhone";
 
         [PostProcessBuildAttribute(45)]
-        public static void AddAppTargetToPodfile(BuildTarget buildTarget, string pathToBuiltProject)
+        public static void ConfigurePodfile(BuildTarget buildTarget, string pathToBuiltProject)
         {
 #if UNITY_IOS
             if (buildTarget != BuildTarget.iOS)
@@ -55,6 +55,7 @@ namespace Facebook.Unity.PostProcess
 
             string contents = File.ReadAllText(podfilePath);
             string updated = PodfileEditor.AppendTargetIfMissing(contents, UnityAppTargetName);
+            updated = PodfileEditor.ForceDynamicFrameworkLinkage(updated);
 
             if (updated != contents)
             {
