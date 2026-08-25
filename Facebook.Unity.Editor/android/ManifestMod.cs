@@ -35,6 +35,7 @@ namespace Facebook.Unity.Editor
         public const string AppLinkActivityName = "com.facebook.unity.FBUnityAppLinkActivity";
         public const string DeepLinkingActivityName = "com.facebook.unity.FBUnityDeepLinkingActivity";
         public const string UnityLoginActivityName = "com.facebook.unity.FBUnityLoginActivity";
+        public const string UnitySSOActivityName = "com.facebook.unity.FBUnitySSOActivity";
         public const string UnityDialogsActivityName = "com.facebook.unity.FBUnityDialogsActivity";
         public const string UnityGameRequestActivityName = "com.facebook.unity.FBUnityGameRequestActivity";
         public const string UnityGamingServicesFriendFinderActivityName = "com.facebook.unity.FBUnityGamingServicesFriendFinderActivity";
@@ -47,6 +48,18 @@ namespace Facebook.Unity.Editor
         public const string FacebookActivityName = "com.facebook.FacebookActivity";
         public const string AndroidManifestPath = "Plugins/Android/AndroidManifest.xml";
         public const string FacebookDefaultAndroidManifestPath = "FacebookSDK/SDK/Editor/android/DefaultAndroidManifest.xml";
+
+        private const string UnityPlayerActivityName = "com.unity3d.player.UnityPlayerActivity";
+        private const string UnityPlayerGameActivityName = "com.unity3d.player.UnityPlayerGameActivity";
+        private const string UnityPlayerNativeActivityName = "com.unity3d.player.UnityPlayerNativeActivity";
+        private const string UnityActivityTheme = "@style/UnityThemeSelector";
+        private const string UnityGameActivityTheme = "@style/BaseUnityGameActivityTheme";
+        private const string GameActivityLibNameMetaDataName = "android.app.lib_name";
+        private const string GameActivityLibNameMetaDataValue = "game";
+
+        // UnityEditor.AndroidApplicationEntry, which this assembly is too old to reference.
+        private const int ActivityEntryFlag = 1;
+        private const int GameActivityEntryFlag = 2;
 
         public static void GenerateManifest()
         {
@@ -106,6 +119,25 @@ namespace Facebook.Unity.Editor
                 Debug.LogWarning(string.Format("{0} is deprecated and no longer needed for the Facebook SDK.  Feel free to use your own main activity or use the default \"com.unity3d.player.UnityPlayerNativeActivity\"", deprecatedMainActivityName));
             }
 
+            // A stale manifest can name an entry point Unity no longer compiles in.
+            XmlElement launcherElement;
+            if (ManifestMod.TryFindLauncherActivity(dict, out launcherElement))
+            {
+                string ns = dict.GetNamespaceOfPrefix("android");
+                string launcherName = launcherElement.GetAttribute("name", ns);
+                string expected = ManifestMod.UseGameActivityEntry()
+                    ? UnityPlayerGameActivityName
+                    : UnityPlayerActivityName;
+
+                if (!ManifestMod.UsesBothEntryPoints()
+                    && ManifestMod.IsUnityEntryPointActivity(launcherName)
+                    && !expected.Equals(launcherName))
+                {
+                    Debug.LogError(string.Format("Your android manifest launches {0}, but the Application Entry Point in Player Settings requires {1}.  Go to Facebook->Edit Settings and press \"Regenerate Android Manifest\"", launcherName, expected));
+                    result = false;
+                }
+            }
+
             return result;
         }
 
@@ -140,9 +172,15 @@ namespace Facebook.Unity.Editor
 
             string ns = dict.GetNamespaceOfPrefix("android");
 
+            ManifestMod.UpdateLauncherActivity(doc, dict, ns);
+
             // add the unity login activity
             XmlElement unityLoginElement = CreateUnityOverlayElement(doc, ns, UnityLoginActivityName);
             ManifestMod.SetOrReplaceXmlElement(dict, unityLoginElement);
+
+            // add the unity SSO ("Login with Facebook" app-switch) activity
+            XmlElement unitySSOElement = CreateUnityOverlayElement(doc, ns, UnitySSOActivityName);
+            ManifestMod.SetOrReplaceXmlElement(dict, unitySSOElement);
 
             // add the unity dialogs activity
             XmlElement unityDialogsElement = CreateUnityOverlayElement(doc, ns, UnityDialogsActivityName);
@@ -216,6 +254,160 @@ namespace Facebook.Unity.Editor
             {
                 doc.Save(xmlWriter);
             }
+        }
+
+        // Reflective, not #if UNITY_2023_1_OR_NEWER: this DLL is precompiled and a guard would strip the check.
+        private static int GetApplicationEntryFlags()
+        {
+            PropertyInfo property = typeof(PlayerSettings.Android).GetProperty(
+                "applicationEntry",
+                BindingFlags.Public | BindingFlags.Static);
+
+            // Editors predating the setting offer Activity only.
+            return property == null
+                ? ActivityEntryFlag
+                : System.Convert.ToInt32(property.GetValue(null, null));
+        }
+
+        private static bool UseGameActivityEntry()
+        {
+            int entry = ManifestMod.GetApplicationEntryFlags();
+            return (entry & ActivityEntryFlag) == 0 && (entry & GameActivityEntryFlag) != 0;
+        }
+
+        // Both flags compile in both entry points, so whichever one the manifest already names launches.
+        private static bool UsesBothEntryPoints()
+        {
+            int entry = ManifestMod.GetApplicationEntryFlags();
+            return (entry & ActivityEntryFlag) != 0 && (entry & GameActivityEntryFlag) != 0;
+        }
+
+        // A custom launcher belongs to the developer; only Unity's own entry points are ours to rewrite.
+        private static bool IsUnityEntryPointActivity(string activityName)
+        {
+            return UnityPlayerActivityName.Equals(activityName)
+                || UnityPlayerGameActivityName.Equals(activityName)
+                || UnityPlayerNativeActivityName.Equals(activityName);
+        }
+
+        private static void UpdateLauncherActivity(XmlDocument doc, XmlNode dict, string ns)
+        {
+            if (ManifestMod.UsesBothEntryPoints())
+            {
+                return;
+            }
+
+            List<XmlElement> unityLaunchers = new List<XmlElement>();
+            foreach (XmlElement candidate in ManifestMod.FindLauncherActivities(dict))
+            {
+                if (ManifestMod.IsUnityEntryPointActivity(candidate.GetAttribute("name", ns)))
+                {
+                    unityLaunchers.Add(candidate);
+                }
+            }
+
+            if (unityLaunchers.Count == 0)
+            {
+                return;
+            }
+
+            bool useGameActivity = ManifestMod.UseGameActivityEntry();
+            string targetName = useGameActivity ? UnityPlayerGameActivityName : UnityPlayerActivityName;
+
+            XmlElement selected = unityLaunchers[0];
+            foreach (XmlElement candidate in unityLaunchers)
+            {
+                if (targetName.Equals(candidate.GetAttribute("name", ns)))
+                {
+                    selected = candidate;
+                    break;
+                }
+            }
+
+            // Unity's UnityManifest.xml ships both entry-point blocks; keeping the other duplicates the name.
+            foreach (XmlElement extra in unityLaunchers)
+            {
+                if (extra != selected)
+                {
+                    extra.ParentNode.RemoveChild(extra);
+                }
+            }
+
+            // The theme moves only with the name, so a theme the developer customized survives.
+            if (!targetName.Equals(selected.GetAttribute("name", ns)))
+            {
+                selected.SetAttribute("name", ns, targetName);
+                selected.SetAttribute("theme", ns, useGameActivity ? UnityGameActivityTheme : UnityActivityTheme);
+            }
+
+            XmlElement libName;
+            bool hasLibName = ManifestMod.TryFindElementWithAndroidName(
+                selected, GameActivityLibNameMetaDataName, out libName, "meta-data");
+
+            if (useGameActivity)
+            {
+                // GameActivity loads the player through this; a stale value starts the app and exits.
+                if (!hasLibName)
+                {
+                    libName = doc.CreateElement("meta-data");
+                    libName.SetAttribute("name", ns, GameActivityLibNameMetaDataName);
+                    selected.AppendChild(libName);
+                }
+
+                libName.SetAttribute("value", ns, GameActivityLibNameMetaDataValue);
+            }
+            else if (hasLibName)
+            {
+                selected.RemoveChild(libName);
+            }
+        }
+
+        private static bool TryFindLauncherActivity(XmlNode parent, out XmlElement element)
+        {
+            List<XmlElement> launchers = ManifestMod.FindLauncherActivities(parent);
+            element = launchers.Count > 0 ? launchers[0] : null;
+            return element != null;
+        }
+
+        // Matched on the intent filter rather than android:name, which is the attribute being fixed.
+        private static List<XmlElement> FindLauncherActivities(XmlNode parent)
+        {
+            string ns = parent.GetNamespaceOfPrefix("android");
+            List<XmlElement> launchers = new List<XmlElement>();
+            for (XmlNode curr = parent.FirstChild; curr != null; curr = curr.NextSibling)
+            {
+                XmlElement activity = curr as XmlElement;
+                if (activity == null || !activity.Name.Equals("activity"))
+                {
+                    continue;
+                }
+
+                foreach (XmlNode filter in activity.GetElementsByTagName("intent-filter"))
+                {
+                    bool isMain = false;
+                    bool isLauncher = false;
+                    foreach (XmlNode entry in filter.ChildNodes)
+                    {
+                        XmlElement entryElement = entry as XmlElement;
+                        if (entryElement == null)
+                        {
+                            continue;
+                        }
+
+                        string name = entryElement.GetAttribute("name", ns);
+                        isMain |= entryElement.Name.Equals("action") && name.Equals("android.intent.action.MAIN");
+                        isLauncher |= entryElement.Name.Equals("category") && name.Equals("android.intent.category.LAUNCHER");
+                    }
+
+                    if (isMain && isLauncher)
+                    {
+                        launchers.Add(activity);
+                        break;
+                    }
+                }
+            }
+
+            return launchers;
         }
 
         private static XmlNode FindChildNode(XmlNode parent, string name)

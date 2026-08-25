@@ -52,7 +52,7 @@ export SDK_VERSION=$SDK_VERSION_MAJOR.$SDK_VERSION_MINOR.$SDK_VERSION_REVISION
 UNITY_JAR_RESOLVER_NAME='unity-jar-resolver'
 UNITY_JAR_RESOLVER_PACKAGE_NAME='external-dependency-manager'
 UNITY_JAR_RESOLVER_BASE_URL="https://github.com/googlesamples/$UNITY_JAR_RESOLVER_NAME/archive/v"
-UNITY_JAR_RESOLVER_VERSION='1.2.166'
+UNITY_JAR_RESOLVER_VERSION='1.2.188'
 UNITY_JAR_RESOLVER_ZIP_URL="$UNITY_JAR_RESOLVER_BASE_URL$UNITY_JAR_RESOLVER_VERSION.zip"
 
 export OUT="$PROJECT_ROOT/out"
@@ -68,6 +68,9 @@ set_unity_path_from_settings() {
   UNITY_CONFIG=$(sed -n "/\<PropertyGroup Condition=\"\'\$(UNITY_VERSION)\' == \'$UNITY_VERSION\'\"\>/,/<\/PropertyGroup>/p" UnityReferences.xml | grep -v PropertyGroup)
   MANAGED=($(awk "/\<UNITY_MANAGED_DIR\>/, /\<\/UNITY_MANAGED_DIR\>/" <<< "$UNITY_CONFIG" | sed -e "s/\<UNITY_MANAGED_DIR\>\(.*\)\<\/UNITY_MANAGED_DIR\>/\1/" | xargs))
   UNITY_PATH=$(sed "s/Managed\//MacOS\/Unity/" <<< "${MANAGED[0]}")
+  # Export the managed assemblies dir so other scripts (e.g. run_tests.sh) can put
+  # Unity's reference assemblies on mono's resolver path. Trailing slash stripped.
+  export UNITY_MANAGED_DIR="${MANAGED[0]%/}"
   if [ ! -f "$UNITY_PATH" ]; then
       echo "Unity executable $UNITY_PATH not found."
       exit 1

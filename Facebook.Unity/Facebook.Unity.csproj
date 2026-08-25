@@ -110,6 +110,7 @@
     <Compile Include="MethodCall.cs" />
     <Compile Include="NativeDialogModes.cs" />
     <Compile Include="OGActionType.cs" />
+    <Compile Include="RefreshFallbackPolicy.cs" />
     <Compile Include="Canvas\CanvasFacebook.cs" />
     <Compile Include="Canvas\CanvasFacebookGameObject.cs" />
     <Compile Include="Canvas\CanvasFacebookLoader.cs" />

@@ -33,6 +33,16 @@ static BOOL _fastAppSwitchEnabled = NO;
 
 @property (nonatomic, copy) NSString *openURLString;
 
+// Declared explicitly so @selector(...) resolves under the Swift Xcode project type, where these
+// are no longer inherited from the AppDelegateListener protocol.
+- (void)didFinishLaunching:(NSNotification *)notification;
+- (void)didBecomeActive:(NSNotification *)notification;
+
+#if UNITY_XCODE_PROJECT_TYPE_SWIFT
+// Swift-only: no AppDelegateListener counterpart to inherit this from.
+- (void)onSceneOpenURLContexts:(NSNotification *)notification;
+#endif
+
 @end
 
 @implementation FBUnityInterface
@@ -54,13 +64,63 @@ static BOOL _fastAppSwitchEnabled = NO;
 
 + (void)load
 {
+#if UNITY_XCODE_PROJECT_TYPE_SWIFT
+  [[FBUnityInterface sharedInstance] registerForLifecycleNotifications];
+#else
   UnityRegisterAppDelegateListener([FBUnityInterface sharedInstance]);
+#endif
 }
 
 #pragma mark - App (Delegate) Lifecycle
 
-// didBecomeActive: and onOpenURL: are called by Unity's AppController
-// because we implement <AppDelegateListener> and registered via UnityRegisterAppDelegateListener(...) above.
+// Under the Objective-C Xcode project type, didBecomeActive: and onOpenURL: are called by Unity's
+// AppController because we implement <AppDelegateListener> and registered via
+// UnityRegisterAppDelegateListener(...) above. The Swift project type has no AppDelegateListener,
+// so the same methods are driven from NotificationCenter instead.
+
+#if UNITY_XCODE_PROJECT_TYPE_SWIFT
+- (void)registerForLifecycleNotifications
+{
+  NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+  [center addObserver:self
+             selector:@selector(didFinishLaunching:)
+                 name:UIApplicationDidFinishLaunchingNotification
+               object:nil];
+  [center addObserver:self
+             selector:@selector(didBecomeActive:)
+                 name:UIApplicationDidBecomeActiveNotification
+               object:nil];
+
+  // Literal names: the UnityNotifications Swift header exists only under the Swift project type.
+  [center addObserver:self
+             selector:@selector(onSceneOpenURLContexts:)
+                 name:@"UnitySceneOpenURLContexts"
+               object:nil];
+}
+
+// A scene can be handed several URLs at once, so each context is offered to the SDK in turn.
+- (void)onSceneOpenURLContexts:(NSNotification *)notification
+{
+  id contexts = notification.userInfo[@"UnityNotificationsOpenURLContextsKey"];
+  if (![contexts isKindOfClass:[NSSet class]]) {
+    return;
+  }
+
+  for (UIOpenURLContext *context in (NSSet *)contexts) {
+    if (![context isKindOfClass:[UIOpenURLContext class]]) {
+      continue;
+    }
+    // sourceApplication and annotation live on context.options here, not the notification userInfo.
+    BOOL isHandledByFBSDK = [[FBSDKApplicationDelegate sharedInstance] application:[UIApplication sharedApplication]
+                                                                          openURL:context.URL
+                                                                sourceApplication:context.options.sourceApplication
+                                                                       annotation:context.options.annotation];
+    if (!isHandledByFBSDK) {
+      [FBUnityInterface sharedInstance].openURLString = [context.URL absoluteString];
+    }
+  }
+}
+#endif
 
 - (void)didFinishLaunching:(NSNotification *)notification
 {
@@ -382,6 +442,33 @@ isPublishPermLogin:(BOOL)isPublishPermLogin
   return nil;
 }
 
+- (void)refreshLimitedLogin:(int)requestId
+             fallbackPolicy:(int)fallbackPolicy
+{
+  FBSDKLoginManager *login = [[FBSDKLoginManager alloc] init];
+  [login refreshLimitedLoginFromViewController:nil
+                               fallbackPolicy:(FBSDKRefreshFallbackPolicy)fallbackPolicy
+                                   completion:^(FBSDKProfile *profile, NSError *error) {
+    if (error) {
+      [FBUnityUtility sendErrorToUnity:FBUnityMessageName_OnRefreshLimitedLoginComplete error:error requestId:requestId];
+      return;
+    }
+
+    // The refreshed Profile is cached as FBSDKProfile.currentProfile and read on
+    // the C# side via FB.Mobile.CurrentProfile(). Send back the refreshed
+    // authentication token so LoginResult can update AuthenticationToken.Current.
+    NSMutableDictionary *userData = [[NSMutableDictionary alloc] init];
+    NSDictionary *authenticationTokenUserData = [self getAuthenticationTokenUserData];
+    if (authenticationTokenUserData) {
+      [userData addEntriesFromDictionary:authenticationTokenUserData];
+    }
+
+    [FBUnityUtility sendMessageToUnity:FBUnityMessageName_OnRefreshLimitedLoginComplete
+                              userData:[userData copy]
+                             requestId:requestId];
+  }];
+}
+
 @end
 
 #pragma mark - Actual Unity C# interface (extern C)
@@ -566,6 +653,40 @@ extern "C" {
                                                           data: data
                                                          title: title];
   }
+
+  // Swift-only: the cold-start URL arrives via Application.absoluteURL from C#, not a notification.
+#if UNITY_XCODE_PROJECT_TYPE_SWIFT
+  void IOSFBHandleLaunchURL(const char *urlString)
+  {
+    if ([FBUnityInterface sharedInstance].openURLString != nil) {
+      return;
+    }
+
+    NSString *absoluteString = [FBUnityUtility stringFromCString:urlString];
+    if (absoluteString.length == 0) {
+      return;
+    }
+
+    NSURL *url = [NSURL URLWithString:absoluteString];
+    if (url == nil) {
+      return;
+    }
+
+    // Offered to the SDK first, like the warm path, so a Login redirect is not seen as an app link.
+    BOOL isHandledByFBSDK = [[FBSDKApplicationDelegate sharedInstance] application:[UIApplication sharedApplication]
+                                                                          openURL:url
+                                                                sourceApplication:nil
+                                                                       annotation:nil];
+    if (!isHandledByFBSDK) {
+      [FBUnityInterface sharedInstance].openURLString = absoluteString;
+    }
+  }
+#else
+  // No-op: onOpenURL: already delivered it, and openURLString is empty when FBSDK claimed the URL.
+  void IOSFBHandleLaunchURL(__unused const char *urlString)
+  {
+  }
+#endif
 
   void IOSFBGetAppLink(int requestId)
   {
@@ -953,5 +1074,10 @@ extern "C" {
                                    requestId:requestId];
       };
     [FBSDKAccessToken refreshCurrentAccessTokenWithCompletion: completion];
+  }
+
+  void IOSFBRefreshLimitedLogin(int requestId, int fallbackPolicy)
+  {
+    [[FBUnityInterface sharedInstance] refreshLimitedLogin:requestId fallbackPolicy:fallbackPolicy];
   }
 }

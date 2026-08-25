@@ -200,6 +200,17 @@ namespace Facebook.Unity.Mobile.Android
             loginCall.Call(args);
         }
 
+        public override void LoginWithSSO(
+            IEnumerable<string> permissions,
+            FacebookDelegate<ILoginResult> callback)
+        {
+            MethodArguments args = new MethodArguments();
+            args.AddCommaSeparatedList(AndroidFacebook.LoginPermissionsKey, permissions);
+            var loginCall = new JavaMethodCall<ILoginResult>(this, "LoginWithSSO");
+            loginCall.Callback = callback;
+            loginCall.Call(args);
+        }
+
         public override void LogOut()
         {
             base.LogOut();
@@ -452,6 +463,17 @@ namespace Facebook.Unity.Mobile.Android
                 "RefreshCurrentAccessToken");
             refreshCurrentAccessToken.Callback = callback;
             refreshCurrentAccessToken.Call();
+        }
+
+        public override void RefreshLimitedLogin(
+            RefreshFallbackPolicy fallbackPolicy,
+            FacebookDelegate<ILoginResult> callback)
+        {
+            if (Debug.isDebugBuild)
+            {
+                Debug.Log("This function is only implemented on iOS.");
+            }
+            return;
         }
 
         public override void OpenFriendFinderDialog(

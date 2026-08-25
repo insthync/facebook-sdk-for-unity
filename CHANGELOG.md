@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Unity 6.5 support on iOS for the Swift Xcode project type, including Login
+  redirects, deep links, and app links.
+- Unity 6 support on Android.
+
+### Changed
+- Bumped the Android External Dependency Manager to `1.2.188` — required for
+  the Unity 6 Android support above.
+    - Upgrading an existing project requires deleting
+      `Assets/ExternalDependencyManager/Editor/1.2.166/` and the old
+      `gpsr`-labeled `.aar`/`.jar` files under `Assets/Plugins/Android/`, then
+      restarting the editor.
+
+## [18.1.0]
+
+### Added
+- `FB.Mobile.RefreshLimitedLogin(callback, fallbackPolicy)` to refresh the profile
+  data of a Limited Login user without a full re-login (iOS only). Added the
+  `RefreshFallbackPolicy` enum (`Automatic`/`SilentOnly`/`ExplicitOnly`/`DirectOnly`)
+  mirroring the native iOS `FBSDKRefreshFallbackPolicy`. On success the refreshed
+  data is available via `FB.Mobile.CurrentProfile()`. No-op on Android.
+- `FB.Mobile.LoginWithSSO(permissions, callback)` to start "Login with Facebook"
+  SSO via an app-switch to the Facebook app, with a fallback dialog when no
+  compatible Facebook app is installed (Android only). No-op on iOS.
+
+### Changed
+- Bumped the iOS dependency to Facebook iOS SDK `~> 18.1.0` — the first release
+  containing `LoginManager.refreshLimitedLogin` (required by the iOS API above).
+- Bumped the Android dependency to Facebook Android SDK `18.3.0` — the first
+  release containing `FBLoginSSOLauncher` (required by the Android API above).
+
 ## [18.0.2]
 
 ### Changed

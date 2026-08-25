@@ -1208,6 +1208,36 @@ namespace Facebook.Unity
             }
 
             /// <summary>
+            /// Refreshes the profile data for a Limited Login user (iOS only).
+            /// On success the refreshed data is available via <see cref="CurrentProfile()"/>
+            /// and the callback receives the new authentication token. On other
+            /// platforms this is a no-op.
+            /// </summary>
+            /// <param name="callback">A callback for when the refresh is complete.</param>
+            /// <param name="fallbackPolicy">How the refresh should be attempted (direct/silent/explicit cascade).</param>
+            public static void RefreshLimitedLogin(
+                FacebookDelegate<ILoginResult> callback = null,
+                RefreshFallbackPolicy fallbackPolicy = RefreshFallbackPolicy.Automatic)
+            {
+                Mobile.MobileFacebookImpl.RefreshLimitedLogin(fallbackPolicy, callback);
+            }
+
+            /// <summary>
+            /// Logs the user in using Facebook SSO ("Login with Facebook") via the installed
+            /// Facebook app, falling back to a "Continue with Facebook" dialog / web login when
+            /// the Facebook app is missing or out of date (Android only). On other platforms
+            /// this is a no-op. On success the callback receives the login result.
+            /// </summary>
+            /// <param name="permissions">A list of permissions to request.</param>
+            /// <param name="callback">A callback for when the login is complete.</param>
+            public static void LoginWithSSO(
+                IEnumerable<string> permissions = null,
+                FacebookDelegate<ILoginResult> callback = null)
+            {
+                Mobile.MobileFacebookImpl.LoginWithSSO(permissions, callback);
+            }
+
+            /// <summary>
             /// Returns the setting for Automatic Purchase Logging
             /// </summary>
             public static bool IsImplicitPurchaseLoggingEnabled()

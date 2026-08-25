@@ -26,6 +26,8 @@ namespace Facebook.Unity.Mobile
 
         void OnRefreshCurrentAccessTokenComplete(ResultContainer resultContainer);
 
+        void OnRefreshLimitedLoginComplete(ResultContainer resultContainer);
+
         void OnFriendFinderComplete(ResultContainer resultContainer);
 
         void OnUploadImageToMediaLibraryComplete(ResultContainer resultContainer);

@@ -25,6 +25,14 @@
 #import <FBSDKLoginKit/FBSDKLoginKit.h>
 #import <FBSDKShareKit/FBSDKShareKit.h>
 
+// Value-tested, never with defined(). See the note in FBUnityInterface.h.
+#if UNITY_XCODE_PROJECT_TYPE_SWIFT
+// UnitySendMessage resolves through the trampoline prefix header under the Objective-C Xcode
+// project type. The Swift project type has no prefix header, so the public plugin interface has
+// to be imported explicitly.
+#import "UnityPluginInterface.h"
+#endif
+
 const char* const FB_OBJECT_NAME = "UnityFacebookSDKPlugin";
 
 // Helper method to create C string copy

@@ -20,41 +20,42 @@
 
 namespace Facebook.Unity.Editor
 {
-    using System.IO;
     using Facebook.Unity;
     using Facebook.Unity.Settings;
     using UnityEditor;
+    using UnityEditor.Build;
+    using UnityEditor.Build.Reporting;
     using UnityEditor.Callbacks;
     using UnityEngine;
 
-    public static class XCodePostProcess
+    // Pre-build so this build gets it: the entry point can change without the Facebook UI that regenerates the manifest.
+    public class FacebookAndroidPreprocess : IPreprocessBuildWithReport
     {
-        [PostProcessBuildAttribute(45)]
-        private static void PostProcessBuild_iOS(BuildTarget target, string buildPath)
+        public int callbackOrder
         {
-            if (target == BuildTarget.iOS)
-            {
-                string podFilePath = Path.Combine(buildPath, "Podfile");
-                if (File.Exists(podFilePath))
-                {
-                    string contents = File.ReadAllText(podFilePath);
-                    bool isUnityIphoneInPodFile = contents.Contains("Unity-iPhone");
-                    using (StreamWriter sw = File.AppendText(podFilePath))
-                    {
-                        if (!isUnityIphoneInPodFile)
-                        {
-                            sw.WriteLine("target 'Unity-iPhone' do");
-                            sw.WriteLine("end");
-                        }
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("No podfile created");
-                }
-            }
+            get { return 0; }
         }
 
+        public void OnPreprocessBuild(BuildReport report)
+        {
+            if (report.summary.platform != BuildTarget.Android)
+            {
+                return;
+            }
+
+            // Without an App ID there is nothing to write, and creating a manifest for an
+            // unconfigured project would change its merge result on every build.
+            if (!FacebookSettings.IsValidAppId)
+            {
+                return;
+            }
+
+            ManifestMod.GenerateManifest();
+        }
+    }
+
+    public static class XCodePostProcess
+    {
         [PostProcessBuild(100)]
         public static void OnPostProcessBuild(BuildTarget target, string path)
         {
@@ -64,14 +65,7 @@ namespace Facebook.Unity.Editor
                 Debug.LogWarning("You didn't specify a Facebook app ID.  Please add one using the Facebook menu in the main Unity editor.");
             }
 
-            // Unity renamed build target from iPhone to iOS in Unity 5, this keeps both versions happy
-            if (target.ToString() == "iOS" || target.ToString() == "iPhone")
-            {
-                UpdatePlist(path);
-                FixupFiles.FixColdStart(path);
-                FixupFiles.AddBuildFlag(path);
-            }
-
+            // iOS is handled by Assets/Editor/FBXcodePostProcess.cs, which ships as source.
             if (target == BuildTarget.Android)
             {
                 // The default Bundle Identifier for Unity does magical things that causes bad stuff to happen
@@ -95,12 +89,13 @@ namespace Facebook.Unity.Editor
             }
         }
 
-        public static void UpdatePlist(string path)
+        /// <summary>
+        /// Writes the Facebook settings into the exported Info.plist at the given full path.
+        /// </summary>
+        public static void UpdatePlistAtPath(string plistFullPath)
         {
-            const string FileName = "Info.plist";
             string appId = FacebookSettings.AppId;
             string clientToken = FacebookSettings.ClientToken;
-            string fullPath = Path.Combine(path, FileName);
 
             if (string.IsNullOrEmpty(appId) || appId.Equals("0"))
             {
@@ -108,7 +103,7 @@ namespace Facebook.Unity.Editor
                 return;
             }
 
-            var facebookParser = new PListParser(fullPath);
+            var facebookParser = new PListParser(plistFullPath);
             facebookParser.UpdateFBSettings(
                 appId,
                 clientToken,

@@ -18,23 +18,27 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Facebook.Unity
+namespace Facebook.Unity.Tests.Mobile
 {
-    /// <summary>
-    /// Facebook sdk version.
-    /// </summary>
-    public class FacebookSdkVersion
+    using NUnit.Framework;
+
+    public abstract class LimitedLoginRefresh : FacebookTestClass
     {
-        /// <summary>
-        /// Gets the SDK build version.
-        /// </summary>
-        /// <value>The sdk version.</value>
-        public static string Build
+        [Test]
+        public void TestRefreshLimitedLogin()
         {
-            get
-            {
-                return "18.1.0";
-            }
+            ILoginResult result = null;
+            FB.Mobile.RefreshLimitedLogin((r) => result = r);
+            Assert.IsNotNull(result);
+            Assert.IsNull(result.Error);
+            Assert.IsNotNull(result.AuthenticationToken);
+        }
+
+        [Test]
+        public void TestRefreshLimitedLoginCallsWrapper()
+        {
+            FB.Mobile.RefreshLimitedLogin();
+            Assert.AreEqual(1, this.Mock.GetMethodCallCount("RefreshLimitedLogin"));
         }
     }
 }

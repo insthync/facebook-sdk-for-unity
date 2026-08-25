@@ -255,6 +255,11 @@ namespace Facebook.Unity.IOS
             IOSWrapper.IOSFBGetAppLink(requestId);
         }
 
+        public void HandleLaunchURL(string url)
+        {
+            IOSWrapper.IOSFBHandleLaunchURL(url);
+        }
+
         public string FBSdkVersion()
         {
             return IOSWrapper.IOSFBSdkVersion();
@@ -431,6 +436,11 @@ namespace Facebook.Unity.IOS
             IOSWrapper.IOSFBRefreshCurrentAccessToken(requestId);
         }
 
+        public void RefreshLimitedLogin(int requestId, int fallbackPolicy)
+        {
+            IOSWrapper.IOSFBRefreshLimitedLogin(requestId, fallbackPolicy);
+        }
+
         [DllImport("__Internal")]
         private static extern void IOSFBInit(
             string appId,
@@ -543,6 +553,9 @@ namespace Facebook.Unity.IOS
         private static extern void IOSFBGetAppLink(int requestID);
 
         [DllImport("__Internal")]
+        private static extern void IOSFBHandleLaunchURL(string url);
+
+        [DllImport("__Internal")]
         private static extern string IOSFBSdkVersion();
 
         [DllImport("__Internal")]
@@ -550,6 +563,9 @@ namespace Facebook.Unity.IOS
 
         [DllImport("__Internal")]
         private static extern void IOSFBRefreshCurrentAccessToken(int requestID);
+
+        [DllImport("__Internal")]
+        private static extern void IOSFBRefreshLimitedLogin(int requestID, int fallbackPolicy);
 
         [DllImport("__Internal")]
         private static extern void IOSFBSetUserID(string userID);

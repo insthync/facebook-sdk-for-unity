@@ -94,10 +94,11 @@ namespace Facebook.Unity.Editor
                 fileList.AddRange(Directory.GetFiles(ScriptsPath, "*.*", SearchOption.AllDirectories));
                 fileList.AddRange(Directory.GetFiles(IAPiOSPath, "*.*", SearchOption.AllDirectories));
 
+                // No IncludeDependencies: the list is already recursive, and the walk adds uGUI.
                 AssetDatabase.ExportPackage(
                     fileList.ToArray(),
                     path,
-                    ExportPackageOptions.IncludeDependencies | ExportPackageOptions.Recurse);
+                    ExportPackageOptions.Recurse);
             }
             finally
             {

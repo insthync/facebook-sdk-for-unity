@@ -83,6 +83,14 @@ namespace Facebook.Unity.Mobile
         public abstract void RefreshCurrentAccessToken(
             FacebookDelegate<IAccessTokenRefreshResult> callback);
 
+        public abstract void RefreshLimitedLogin(
+            RefreshFallbackPolicy fallbackPolicy,
+            FacebookDelegate<ILoginResult> callback);
+
+        public abstract void LoginWithSSO(
+            IEnumerable<string> permissions,
+            FacebookDelegate<ILoginResult> callback);
+
         public abstract bool IsImplicitPurchaseLoggingEnabled();
 
         public abstract void SetAutoLogAppEventsEnabled(bool autoLogAppEventsEnabled);
@@ -136,6 +144,12 @@ namespace Facebook.Unity.Mobile
             }
 
             CallbackManager.OnFacebookResponse(result);
+        }
+
+        public void OnRefreshLimitedLoginComplete(ResultContainer resultContainer)
+        {
+            var result = new LoginResult(resultContainer);
+            this.OnAuthResponse(result);
         }
 
         public override void OpenFriendFinderDialog(FacebookDelegate<IGamingServicesFriendFinderResult> callback)

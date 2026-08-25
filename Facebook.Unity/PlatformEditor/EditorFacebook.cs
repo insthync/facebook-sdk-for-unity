@@ -119,6 +119,26 @@ namespace Facebook.Unity.Editor
                 permissions.ToCommaSeparateList());
         }
 
+        public void RefreshLimitedLogin(
+            RefreshFallbackPolicy fallbackPolicy,
+            FacebookDelegate<ILoginResult> callback)
+        {
+            this.editorWrapper.ShowLoginMockDialog(
+                this.OnRefreshLimitedLoginComplete,
+                this.CallbackManager.AddFacebookDelegate(callback),
+                "public_profile");
+        }
+
+        public void LoginWithSSO(
+            IEnumerable<string> permissions,
+            FacebookDelegate<ILoginResult> callback)
+        {
+            this.editorWrapper.ShowLoginMockDialog(
+                this.OnLoginComplete,
+                this.CallbackManager.AddFacebookDelegate(callback),
+                permissions == null ? "public_profile" : permissions.ToCommaSeparateList());
+        }
+
         public override void AppRequest(
             string message,
             OGActionType? actionType,
@@ -377,6 +397,12 @@ namespace Facebook.Unity.Editor
         {
             var result = new AccessTokenRefreshResult(resultContainer);
             CallbackManager.OnFacebookResponse(result);
+        }
+
+        public void OnRefreshLimitedLoginComplete(ResultContainer resultContainer)
+        {
+            var result = new LoginResult(resultContainer);
+            this.OnAuthResponse(result);
         }
 
         public void OnFriendFinderComplete(ResultContainer resultContainer)

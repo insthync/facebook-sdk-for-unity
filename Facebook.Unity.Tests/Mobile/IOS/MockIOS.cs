@@ -223,6 +223,11 @@ namespace Facebook.Unity.Tests.Mobile.IOS
             this.Facebook.OnGetAppLinkComplete(new ResultContainer(result));
         }
 
+        public void HandleLaunchURL(string url)
+        {
+            this.LogMethodCall();
+        }
+
         public string FBSdkVersion()
         {
             return "1.0.0";
@@ -246,6 +251,15 @@ namespace Facebook.Unity.Tests.Mobile.IOS
                 string.Empty,
                 this.ResultExtras);
             this.MobileFacebook.OnRefreshCurrentAccessTokenComplete(new ResultContainer(result));
+        }
+
+        public void RefreshLimitedLogin(int requestID, int fallbackPolicy)
+        {
+            this.LogMethodCall();
+            var result = MockResults.GetGenericResult(requestID, this.ResultExtras);
+            result.TrySetKey(LoginResult.AuthTokenString, "mock_auth_token_string");
+            result.TrySetKey(LoginResult.AuthNonce, "mock_auth_nonce");
+            this.MobileFacebook.OnRefreshLimitedLoginComplete(new ResultContainer(result));
         }
 
         private void LoginCommon(

@@ -18,14 +18,28 @@
 
 #import <UIKit/UIKit.h>
 
+// Value-tested, never with defined(): Unity sets the macro to 0 under the Objective-C Xcode
+// project type and 1 under Swift, so defined() would take the Swift branch under both. How Unity
+// delivers it to third-party plugin sources is unverified here — the macro is Unity 6.5+ only and
+// no trampoline vendored in third-party/toolchains/unity is new enough to define it. Absence is
+// the safe case either way: #if reads an undefined macro as 0, i.e. the Objective-C branch.
+#if !UNITY_XCODE_PROJECT_TYPE_SWIFT
+// Trampoline-only. The Swift Xcode project type replaces UnityAppController with UnityPlayer and
+// publishes lifecycle through NotificationCenter, so neither this header nor the
+// AppDelegateListener protocol exists there.
 #import "AppDelegateListener.h"
 
 //if we are on a version of unity that has the version number defined use it, otherwise we have added it ourselves in the post build step
 #if HAS_UNITY_VERSION_DEF
 #include "UnityTrampolineConfigure.h"
 #endif
+#endif
 
+#if UNITY_XCODE_PROJECT_TYPE_SWIFT
+@interface FBUnityInterface : NSObject
+#else
 @interface FBUnityInterface : NSObject <AppDelegateListener>
+#endif
 {
   //If you make changes in here make the same changes in Assets/Facebook/Scripts/NativeDialogModes.cs
   enum ShareDialogMode

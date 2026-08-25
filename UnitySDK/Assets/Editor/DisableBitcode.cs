@@ -40,23 +40,31 @@ namespace Facebook.Unity.PostProcess
         {
 #if UNITY_IOS
             if (buildTarget != BuildTarget.iOS) return;
-            string projectPath = pathToBuildProject + "/Unity-iPhone.xcodeproj/project.pbxproj";
+            // Resolved, not assumed: only the Objective-C project type is named statically.
+            string projectPath = PBXProject.GetPBXProjectPath(pathToBuildProject);
             PBXProject pbxProject = new PBXProject();
             pbxProject.ReadFromFile(projectPath);
 
             //Disabling Bitcode on all targets
             //Main
-            string target = pbxProject.GetUnityMainTargetGuid();
-            pbxProject.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
-            //Unity Tests
-            target = pbxProject.TargetGuidByName(PBXProject.GetUnityTestTargetName());
-            pbxProject.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
+            DisableBitcodeOnTarget(pbxProject, pbxProject.GetUnityMainTargetGuid());
+            //Unity Tests - not emitted by every Xcode project type
+            DisableBitcodeOnTarget(pbxProject, pbxProject.TargetGuidByName(PBXProject.GetUnityTestTargetName()));
             //Unity Framework
-            target = pbxProject.GetUnityFrameworkTargetGuid();
-            pbxProject.SetBuildProperty(target, "ENABLE_BITCODE", "NO");
+            DisableBitcodeOnTarget(pbxProject, pbxProject.GetUnityFrameworkTargetGuid());
 
             pbxProject.WriteToFile(projectPath);
 #endif
         }
+
+#if UNITY_IOS
+        private static void DisableBitcodeOnTarget(PBXProject pbxProject, string targetGuid)
+        {
+            if (!string.IsNullOrEmpty(targetGuid))
+            {
+                pbxProject.SetBuildProperty(targetGuid, "ENABLE_BITCODE", "NO");
+            }
+        }
+#endif
     }
 }

@@ -61,7 +61,16 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.facebook.android:facebook-android-sdk:[18.0.0,19)'
+    // 18.3.0 is the first Facebook Android SDK release containing FB Login SSO
+    // (FBLoginSSOLauncher), required by FBUnitySSOActivity / FBLogin.loginWithSSO.
+    implementation 'com.facebook.android:facebook-android-sdk:[18.3.0,19)'
+
+    // AndroidX deps required by the SSO launcher: FBLoginSSOLauncher needs a
+    // ComponentActivity for registerForActivityResult, and the no-app fallback
+    // dialog needs a FragmentActivity. The SDK declares these with implementation
+    // scope, so they are NOT exposed transitively — declare them explicitly here.
+    implementation 'androidx.activity:activity:1.2.0'
+    implementation 'androidx.fragment:fragment:1.3.0'
 
     // enable local testing
     if (project.hasProperty("localRepo")) {
@@ -70,8 +79,10 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '29.0.3'
+    // Bumped from 29: facebook-android-sdk 18.3.0 and its AndroidX deps
+    // (androidx.activity 1.2.0) require compileSdk >= 30; use 34 to match the SDK.
+    compileSdkVersion 34
+    buildToolsVersion '34.0.0'
 
     defaultConfig {
         minSdkVersion 15

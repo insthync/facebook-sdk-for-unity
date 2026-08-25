@@ -18,23 +18,13 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Facebook.Unity
+namespace Facebook.Unity.Tests.Mobile.IOS
 {
-    /// <summary>
-    /// Facebook sdk version.
-    /// </summary>
-    public class FacebookSdkVersion
+    using NUnit.Framework;
+
+    [IOSTest]
+    [TestFixture]
+    public class LimitedLoginRefresh : Facebook.Unity.Tests.Mobile.LimitedLoginRefresh
     {
-        /// <summary>
-        /// Gets the SDK build version.
-        /// </summary>
-        /// <value>The sdk version.</value>
-        public static string Build
-        {
-            get
-            {
-                return "18.1.0";
-            }
-        }
     }
 }

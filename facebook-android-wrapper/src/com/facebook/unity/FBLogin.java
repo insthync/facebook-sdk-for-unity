@@ -33,6 +33,7 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.DeviceLoginManager;
+import com.facebook.login.FBLoginSSOLauncher;
 import com.facebook.login.LoginBehavior;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
@@ -60,6 +61,97 @@ public class FBLogin {
             String params,
             final FBUnityLoginActivity activity) {
         login(params, activity, true, true);
+    }
+
+    public static void loginWithSSO(
+            String params,
+            final FBUnitySSOActivity activity) {
+        if (params == null) {
+            // The proxy activity can be recreated by Android after process death (or started
+            // without its extra), delivering null params. Fail gracefully rather than letting
+            // UnityParams.parse(null) throw and crash the activity.
+            Log.w(FB.TAG, "loginWithSSO called with null params; aborting.");
+            sendLoginCancelOrErrorMessage(null, "SSO login failed: missing login parameters.");
+            activity.finish();
+            return;
+        }
+        if (!FacebookSdk.isInitialized()) {
+            Log.w(FB.TAG, "Facebook SDK not initialized. Call init() before calling loginWithSSO()");
+            activity.finish();
+            return;
+        }
+
+        UnityParams unity_params = UnityParams.parse(params,
+                "couldn't parse login params: " + params);
+
+        List<String> permissions = new ArrayList<>();
+        if (unity_params.hasString("scope")) {
+            permissions = new ArrayList<>(
+                    Arrays.asList(unity_params.getString("scope").split(",")));
+        }
+
+        String callbackIDString = null;
+        if (unity_params.has(Constants.CALLBACK_ID_KEY)) {
+            callbackIDString = unity_params.getString(Constants.CALLBACK_ID_KEY);
+        }
+        final String callbackID = callbackIDString;
+
+        FacebookCallback<LoginResult> callback = new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                sendLoginSuccessMessage(
+                        loginResult.getAccessToken(),
+                        loginResult.getAuthenticationToken(),
+                        callbackID);
+                activity.finish();
+            }
+
+            @Override
+            public void onCancel() {
+                sendLoginCancelOrErrorMessage(callbackID, null);
+                activity.finish();
+            }
+
+            @Override
+            public void onError(FacebookException e) {
+                Log.w(FB.TAG, "SSO login error", e);
+                // getMessage() may be null for some FacebookExceptions; fall back to toString()
+                // so this is reported as a real error, not mis-routed to the cancel path.
+                String message = e.getMessage() != null ? e.getMessage() : e.toString();
+                sendLoginCancelOrErrorMessage(callbackID, message);
+                activity.finish();
+            }
+        };
+
+        // Must be constructed during onCreate (registerForActivityResult requirement).
+        FBLoginSSOLauncher ssoLauncher = new FBLoginSSOLauncher(activity, callback);
+        activity.setSSOLauncher(ssoLauncher);
+        boolean launched = ssoLauncher.launch(permissions);
+        if (!launched) {
+            // launch() returns false (with no callback) when the LoginSSO gatekeeper is
+            // disabled, an access token already exists, or no Facebook app capable of SSO is
+            // installed. Surface a result and finish so the proxy activity doesn't hang.
+            Log.w(FB.TAG, "FBLoginSSOLauncher.launch() returned false; SSO unavailable.");
+            sendLoginCancelOrErrorMessage(callbackID,
+                    "SSO unavailable: launch() returned false. Ensure the LoginSSO gatekeeper is "
+                    + "enabled for this app and a current Facebook app is installed, and that you "
+                    + "are not already logged in.");
+            activity.finish();
+        }
+    }
+
+    private static void sendLoginCancelOrErrorMessage(String callbackID, String error) {
+        UnityMessage unityMessage = new UnityMessage("OnLoginComplete");
+        unityMessage.put("key_hash", FB.getKeyHash());
+        if (callbackID != null && !callbackID.isEmpty()) {
+            unityMessage.put(Constants.CALLBACK_ID_KEY, callbackID);
+        }
+        if (error != null) {
+            unityMessage.sendError(error);
+        } else {
+            unityMessage.putCancelled();
+            unityMessage.send();
+        }
     }
 
     public static void sendLoginSuccessMessage(AccessToken accessToken, AuthenticationToken authenticationToken, String callbackID) {

@@ -169,6 +169,14 @@ public class FB {
     }
 
     @UnityCallable
+    public static void LoginWithSSO(String params_str) {
+        Log.v(TAG, "LoginWithSSO(" + params_str + ")");
+        Intent intent = new Intent(getUnityActivity(), FBUnitySSOActivity.class);
+        intent.putExtra(FBUnitySSOActivity.LOGIN_PARAMS, params_str);
+        getUnityActivity().startActivity(intent);
+    }
+
+    @UnityCallable
     public static void Logout(String params_str) {
         Log.v(TAG, "Logout(" + params_str + ")");
         LoginManager.getInstance().logOut();
